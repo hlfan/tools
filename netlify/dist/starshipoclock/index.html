@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zxx">
+	<head>
+		<title>it's Starship o'clock</title>
+		<meta name="description" content="A SpaceX Starship themed clock"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<link rel="preload" href="../vent.mp4" as="video" type="video/mp4"/>
+		<style>
+			html,body{height:100%;overflow:hidden}
+			body{margin:0;background:#000}
+			svg{height:100%;width:100%}
+			foreignObject{mix-blend-mode:screen;height:150px;width:150px;x:-75px;y:-75px}
+			video{filter:contrast(100.5%);height:100%;mix-blend-mode:screen;padding-right:50%;position:absolute;width:50%}
+			.raptors{fill:#ffffff69;stroke:#696969;stroke-width:.3}
+			use.rc{x:15px;rotate:calc(120deg*var(--i))}
+			use.rg{x:40px;rotate:calc(36deg*var(--i))}
+			use.rb{x:65px;rotate:calc(9deg + 18deg*var(--i))}
+			path{stroke:#fff;stroke-width:.5}
+			.engines{fill:#fff}
+			use{transition:all .25s}
+		</style>
+		<script>
+			let $=(...a)=>document.querySelector(...a);
+			function update(){
+				let date=new Date,
+					raptorState=('0'.repeat(30)+(date/1e3<<0).toString(2)).slice(-33),
+					delay=5+1e3-date%1e3;
+				raptors.forEach((r,i)=>r.style.fillOpacity=raptorState[i]);
+				date=(date/1e3-date.getTimezoneOffset()*60)%432e3;
+				ship.style.rotate=date/120+'deg';
+				booster.style.rotate=date/10-180+'deg';
+				vents[0].style.rotate=date*6+90+'deg';
+				vents[0].play();
+				vents=vents.reverse();
+				return queueMicrotask(()=>setTimeout(update,delay));
+			}
+		</script>
+	</head>
+	<body>
+		<svg viewBox="-75 -75 150 150">
+			<defs>
+				<circle id="raptor" r="10"/>
+				<path id="ship" d="M4.5 0v-36.95C4.5-41.2 3.1-45.85.6-49.7A.75.75 0 00-.6-49.7C-3.1-45.85-4.5-41.2-4.5-36.95V0ZM4.5-.05H9.15V-7.45L4.5-14.45M-4.5-.05H-9.15V-7.45L-4.5-14.45m9 7.55h-9m0-22.1h9m0-7.95H8.3V-40.4L2.8-45.4M2.3-46.6H-2.3M-2.8-45.4-8.3-40.4v3.45h3.8"></path>
+				<g id="booster">
+					<path d="M8 1.1H4.5m-9 0H-8M-4.5 43l-1 1.2V65l1 1.1m9 0 1-1.1V44.2l-1-1.2V0h-9V66.5m0-2h9m0 2V0"></path>
+					<path class="engines" d="M-4.5 66.3-5 68.7H5L4.5 66.3Z"></path>
+				</g>
+			</defs>
+			<foreignObject>
+				<video muted><source src="../vent.mp4" type="video/mp4"></video>
+				<video muted><source src="../vent.mp4" type="video/mp4"></video>
+			</foreignObject>
+			<g class="raptors">
+				<use href="#raptor" id="e1" class="rc" style="--i:0"/>
+				<use href="#raptor" id="e2" class="rc" style="--i:1"/>
+				<use href="#raptor" id="e3" class="rc" style="--i:2"/>
+				<use href="#raptor" id="e4" class="rg" style="--i:0"/>
+				<use href="#raptor" id="e5" class="rg" style="--i:1"/>
+				<use href="#raptor" id="e6" class="rg" style="--i:2"/>
+				<use href="#raptor" id="e7" class="rg" style="--i:3"/>
+				<use href="#raptor" id="e8" class="rg" style="--i:4"/>
+				<use href="#raptor" id="e9" class="rg" style="--i:5"/>
+				<use href="#raptor" id="e10" class="rg" style="--i:6"/>
+				<use href="#raptor" id="e11" class="rg" style="--i:7"/>
+				<use href="#raptor" id="e12" class="rg" style="--i:8"/>
+				<use href="#raptor" id="e13" class="rg" style="--i:9"/>
+				<use href="#raptor" id="e14" class="rb" style="--i:0"/>
+				<use href="#raptor" id="e15" class="rb" style="--i:1"/>
+				<use href="#raptor" id="e16" class="rb" style="--i:2"/>
+				<use href="#raptor" id="e17" class="rb" style="--i:3"/>
+				<use href="#raptor" id="e18" class="rb" style="--i:4"/>
+				<use href="#raptor" id="e19" class="rb" style="--i:5"/>
+				<use href="#raptor" id="e20" class="rb" style="--i:6"/>
+				<use href="#raptor" id="e21" class="rb" style="--i:7"/>
+				<use href="#raptor" id="e22" class="rb" style="--i:8"/>
+				<use href="#raptor" id="e23" class="rb" style="--i:9"/>
+				<use href="#raptor" id="e24" class="rb" style="--i:10"/>
+				<use href="#raptor" id="e25" class="rb" style="--i:11"/>
+				<use href="#raptor" id="e26" class="rb" style="--i:12"/>
+				<use href="#raptor" id="e27" class="rb" style="--i:13"/>
+				<use href="#raptor" id="e28" class="rb" style="--i:14"/>
+				<use href="#raptor" id="e29" class="rb" style="--i:15"/>
+				<use href="#raptor" id="e30" class="rb" style="--i:16"/>
+				<use href="#raptor" id="e31" class="rb" style="--i:17"/>
+				<use href="#raptor" id="e32" class="rb" style="--i:18"/>
+				<use href="#raptor" id="e33" class="rb" style="--i:19"/>
+			</g>
+			<use href="#ship"></use>
+			<use href="#booster"></use>
+		</svg>
+		<script>
+			let raptors=[...$('.raptors').children].reverse(),
+				ship=$('[href="#ship"]'),
+				booster=$('[href="#booster"]'),
+				vents=[...$("foreignObject").children];
+			update();
+		</script>
+	</body>
+</html>

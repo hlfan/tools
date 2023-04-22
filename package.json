@@ -1,0 +1,14 @@
+{
+	"name": "toolz",
+	"version": "1.0.0",
+	"scripts": {
+		"build": "tsc -p ."
+	},
+	"devDependencies": {
+		"@types/node": "^18.15.10",
+		"typescript": "^5.0.2"
+	},
+	"dependencies": {
+		"@netlify/functions": "^1.4.0"
+	}
+}

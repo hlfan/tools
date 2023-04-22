@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"module": "es2020",
+		"target": "es2022",
+		"rootDir": "netlify/src",
+		"outDir": "netlify/dist"
+	},
+	"include": [
+		"netlify/**/*"
+	],
+	"exclude": [
+		"node_modules",
+		"netlify/edge-functions/ytthumb/ytthumb.ts"
+	]
+}

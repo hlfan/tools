@@ -1,0 +1,46 @@
+<html lang="en">
+	<head>
+		<title>Let's watch the Starship launch!</title>
+		<style>
+			body{background:#000;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);height:100%;margin:0}
+			iframe{border-width:0;height:100%;width:100%}
+			@media(max-aspect-ratio:1/1){
+				body{grid-template:unset;grid-template-columns:1fr 1fr;height:auto}
+				iframe{aspect-ratio:16/9;grid-column:span 1!important;grid-row:span 1!important}
+			}
+		</style>
+		<script>
+			let addVid=a=>{
+				let b=document.createElement("iframe");
+				b.src=`https://youtube.com/embed/${a[0]}?autoplay=1&mute=1`;
+				b.style.gridArea=a[1];
+				b.allow="autoplay; encrypted-media; picture-in-picture";
+				b.allowFullscreen=!0;
+				document.body.append(b)
+			},
+			    addVids=a=>Object.entries(a).map(addVid),
+			    init=async()=>{
+				let check=await fetch('../ytthumb/'+custom);
+				addVids(vids);
+				check.ok?addVid([custom,'3/5/5/7']):addVids(replacementVids)
+			    }
+			    vids={
+				"-1wcilQ58hI":"1/1/5/5",
+				eAl3gVvMNNM:"5/1/7/3",
+				uouujjgkR3A:"5/3/7/5",
+				mhJRzQsLZGg:"1/5/3/7",
+				w2BQKCnPkIc:"5/5/7/7"
+			},
+			    replacementVids={
+				BpqULvjOMz4:"3/5/4/6",
+				K0iL6oIHU3U:"3/6/4/7",
+				Ln8hXptcA90:"4/6/5/7",
+				"ovf0-kRB3iE":"4/5/5/6"
+			},
+			    custom=location.search.slice(1)||'0';
+		</script>
+	</head>
+	<body>
+		<script>init()</script>
+	</body>
+</html>

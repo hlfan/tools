@@ -1,0 +1,9 @@
+[[headers]]
+for = "/src/*"
+[headers.values]
+Access-Control-Allow-Origin = "*"
+
+[[redirects]]
+force = true
+from = "/**/*.ts"
+to = "/:splat.js"
