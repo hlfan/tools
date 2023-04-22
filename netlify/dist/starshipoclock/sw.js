@@ -1,4 +1,4 @@
-const v="v1.1";
+const v="v1.2";
 self.addEventListener("install",e=>{
 	e.waitUntil(caches.open(v).then(cache=>
 		cache.addAll(["index.html","vent.mp4","manifest.json"]
