@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="--ro:-11deg" viewBox="-75 -75 150 150">
+	<defs>
+		<circle id="raptor" r="10"/>
+		<style>
+			use{fill:#ffffff69;stroke:#696969}use.rc{x:-15px;rotate:calc(120deg*var(--i) + var(--ro))}use.rg{x:-40px;rotate:calc(36deg*var(--i) + var(--ro))}use.rb{x:-65px;rotate:calc(9deg + 18deg*var(--i) + var(--ro))}
+		</style>
+	</defs>
+	<use id="e2" class="rc" href="#raptor" style="--i:1"/>
+	<use id="e3" class="rc" href="#raptor" style="--i:2"/>
+	<use id="e4" class="rg" href="#raptor" style="--i:0"/>
+	<use id="e5" class="rg" href="#raptor" style="--i:1"/>
+	<use id="e6" class="rg" href="#raptor" style="--i:2"/>
+	<use id="e7" class="rg" href="#raptor" style="--i:3"/>
+	<use id="e8" class="rg" href="#raptor" style="--i:4"/>
+	<use id="e9" class="rg" href="#raptor" style="--i:5"/>
+	<use id="e10" class="rg" href="#raptor" style="--i:6"/>
+	<use id="e11" class="rg" href="#raptor" style="--i:7"/>
+	<use id="e12" class="rg" href="#raptor" style="--i:8"/>
+	<use id="e13" class="rg" href="#raptor" style="--i:9"/>
+	<use id="e14" class="rb" href="#raptor" style="--i:0"/>
+	<use id="e15" class="rb" href="#raptor" style="--i:1"/>
+	<use id="e16" class="rb" href="#raptor" style="--i:2"/>
+	<use id="e17" class="rb" href="#raptor" style="--i:3"/>
+	<use id="e20" class="rb" href="#raptor" style="--i:6"/>
+	<use id="e21" class="rb" href="#raptor" style="--i:7"/>
+	<use id="e23" class="rb" href="#raptor" style="--i:9"/>
+	<use id="e24" class="rb" href="#raptor" style="--i:10"/>
+	<use id="e25" class="rb" href="#raptor" style="--i:11"/>
+	<use id="e28" class="rb" href="#raptor" style="--i:14"/>
+	<use id="e29" class="rb" href="#raptor" style="--i:15"/>
+	<use id="e30" class="rb" href="#raptor" style="--i:16"/>
+	<use id="e31" class="rb" href="#raptor" style="--i:17"/>
+	<use id="e32" class="rb" href="#raptor" style="--i:18"/>
+	<use id="e33" class="rb" href="#raptor" style="--i:19"/>
+</svg>

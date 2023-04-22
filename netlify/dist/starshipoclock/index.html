@@ -4,20 +4,21 @@
 		<title>it's Starship o'clock</title>
 		<meta name="description" content="A SpaceX Starship themed clock"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<link rel="preload" href="../vent.mp4" as="video" type="video/mp4"/>
+		<link rel="preload" href="vent.mp4" as="video" type="video/mp4"/>
 		<style>
 			html,body{height:100%;overflow:hidden}
 			body{margin:0;background:#000}
-			svg{height:100%;width:100%}
+			svg{height:100%;width:100%;--ro:-11deg}
 			foreignObject{mix-blend-mode:screen;height:150px;width:150px;x:-75px;y:-75px}
-			video{filter:contrast(100.5%);height:100%;mix-blend-mode:screen;padding-right:50%;position:absolute;width:50%}
+			video{filter:contrast(101%);height:100%;mix-blend-mode:screen;padding-right:50%;position:absolute;width:50%}
 			.raptors{fill:#ffffff69;stroke:#696969;stroke-width:.3}
-			use.rc{x:15px;rotate:calc(120deg*var(--i))}
-			use.rg{x:40px;rotate:calc(36deg*var(--i))}
-			use.rb{x:65px;rotate:calc(9deg + 18deg*var(--i))}
+			use.rc{x:-15px;rotate:calc(120deg*var(--i) + var(--ro))}
+			use.rg{x:-40px;rotate:calc(36deg*var(--i) + var(--ro))}
+			use.rb{x:-65px;rotate:calc(9deg + 18deg*var(--i) + var(--ro))}
 			path{stroke:#fff;stroke-width:.5}
 			.engines{fill:#fff}
 			use{transition:all .25s}
+			#e1,#e18,#e19,#e22,#e26,#e27{stroke-opacity:0}
 		</style>
 		<script>
 			let $=(...a)=>document.querySelector(...a);
@@ -29,12 +30,14 @@
 				date=(date/1e3-date.getTimezoneOffset()*60)%432e3;
 				ship.style.rotate=date/120+'deg';
 				booster.style.rotate=date/10-180+'deg';
-				vents[0].style.rotate=date*6+90+'deg';
+				vents[0].style.rotate=(90+date*6<<0)%360+'deg';
 				vents[0].play();
 				vents=vents.reverse();
 				return queueMicrotask(()=>setTimeout(update,delay));
 			}
+			s=navigator.serviceWorker;if(s)s.register('sw.js');
 		</script>
+		<link rel="manifest" href="manifest.json"/>
 	</head>
 	<body>
 		<svg viewBox="-75 -75 150 150">
@@ -47,8 +50,8 @@
 				</g>
 			</defs>
 			<foreignObject>
-				<video muted><source src="../vent.mp4" type="video/mp4"></video>
-				<video muted><source src="../vent.mp4" type="video/mp4"></video>
+				<video muted><source src="vent.mp4" type="video/mp4"></video>
+				<video muted><source src="vent.mp4" type="video/mp4"></video>
 			</foreignObject>
 			<g class="raptors">
 				<use href="#raptor" id="e1" class="rc" style="--i:0"/>
