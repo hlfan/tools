@@ -63,7 +63,7 @@ function update(){
 let $=(...s)=>document.querySelector(...s),
 	button=$("path"),
 	catcher=$("header"),
-	setProgress=n=>button.nextElementSibling.style.setProperty('--f',n),
+	setProgress=n=>button.nextElementSibling.style.setProperty('--f',Math.round(n*1e5)/1e5),
 	setPower=p=>button.style.fill=`rgb(0 ${(Math.sqrt(p)/2+1)*200<<0} 0)`,
 	setPath=s=>button.setAttribute("d",s),
 	ctx=new AudioContext,
