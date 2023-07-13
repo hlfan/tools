@@ -19,11 +19,12 @@ input::file-selector-button{background:#0f0;border:solid #222 2px;border-radius:
 <circle r="50"/>
 </svg><div>
 <input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/>
-<button onclick="pause(),catcher.classList.toggle('selected')">📂</button>
+<button onclick="catcher.classList.toggle('selected')">📂</button>
 </div><header><input type="file"></header><script>var audioBuffer,source;
 function handleFileInput(input){
 	if(!input.files.length)return;
 	let reader=new FileReader();
+	pause(),
 	catcher.classList.remove("catching"),
 	catcher.classList.add("selected"),
 	reader.onload=async e=>{
