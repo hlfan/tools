@@ -1,0 +1,75 @@
+<html><head><title>Audio-Loopstation</title><style>
+body{accent-color:#0f0;background:#111;margin:0}
+svg{fill:#0f0;filter:opacity(.7)drop-shadow(0 0 3vmin #0f0);height:100%;width:100%}
+circle{fill:none;stroke:#0f0;stroke-dasharray:var(--p) var(--p);stroke-dashoffset:calc(var(--f)*var(--p));stroke-width:15;transform:rotate(-90deg)}
+circle[style]{transition:all .5s ease-out;--p:314.159265359}
+div,header{inset:0;margin:auto;max-height:100vmin;max-width:100vmin;position:absolute}
+div,header.selected{pointer-events:none}
+header{border-radius:50%;box-sizing:border-box;display:flex;mix-blend-mode:difference;padding:15vmin;transition:backdrop-filter.2s}
+header:not(.selected){backdrop-filter:brightness(9%)blur(5vmin)}.selected>*{display:none}
+header.catching{background:#048c}
+button{background:none;border:none;filter:sepia(1)hue-rotate(40deg)saturate(5);font-size:12vmin;inset:0 0 auto auto;padding:0}
+div>*{cursor:pointer;margin:0;pointer-events:all;position:absolute}
+input[type="range"]{-webkit-appearance:slider-vertical;inset:29% 71% 29% 21%}
+input[type="file"]{color:#fff;margin:auto;text-wrap:balance;width:100%}
+input{zoom:4}
+input::file-selector-button{background:#0f0;border:solid #222 2px;border-radius:1ch;text-wrap:wrap;width:100%}
+</style></head><body><svg viewBox="-60 -60 120 120">
+<path d="M0 25c14 0 25-11 25-25S14-25 0-25-25-14-25 0s11 25 25 25"/>
+<circle r="50"/>
+</svg><div>
+<input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/>
+<button onclick="pause(),catcher.classList.toggle('selected')">📂</button>
+</div><header><input type="file"></header><script>var audioBuffer,source;
+function handleFileInput(input){
+	if(!input.files.length)return;
+	let reader=new FileReader();
+	catcher.classList.remove("catching"),
+	catcher.classList.add("selected"),
+	reader.onload=async e=>{
+		audioBuffer=await ctx.decodeAudioData(e.target.result),
+		button.setAttribute("onclick","isPlaying?pause():play()"),
+		pause(),
+		setProgress(1)
+	},
+	reader.readAsArrayBuffer(input.files[0])
+}
+function play(){
+	isPlaying=1,
+	source=ctx.createBufferSource(),
+	setPath("M-25-25h50v50h-50z"),
+	source.connect(gainNode),
+	source.buffer=audioBuffer,
+	source.loop=1,
+	time=ctx.currentTime,
+	source.start(),
+	move()
+}
+function pause(){
+	isPlaying&&source.stop(),
+	isPlaying=0;
+	if(!audioBuffer)return;
+	setProgress(1),
+	setPath("M-15-26v52L30 0z")
+}
+function move(){
+	if(!isPlaying)return;
+	setProgress(2**((time-ctx.currentTime)/source.buffer.duration)),
+	requestAnimationFrame(move)
+}
+let $=(...s)=>document.querySelector(...s),
+	button=$("path"),
+	catcher=$("header"),
+	setProgress=n=>button.nextElementSibling.style.setProperty('--f',n),
+	setPath=s=>button.setAttribute("d",s),
+	ctx=new AudioContext,
+	gainNode=ctx.createGain(),
+	isPlaying=0,
+	time=0;
+
+catcher.firstElementChild.addEventListener("change",e=>handleFileInput(e.target)),
+catcher.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
+catcher.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
+catcher.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
+gainNode.connect(ctx.destination),
+gainNode.gain.value=.125</script></body></html>
