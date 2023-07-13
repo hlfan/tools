@@ -39,12 +39,12 @@ function play(){
 	isPlaying=1,
 	source=ctx.createBufferSource(),
 	setPath("M-25-25h50v50h-50z"),
-	source.connect(gainNode),
+	source.connect(analyser),
 	source.buffer=audioBuffer,
 	source.loop=1,
 	time=ctx.currentTime,
 	source.start(),
-	move()
+	update()
 }
 function pause(){
 	isPlaying&&source.stop(),
@@ -53,24 +53,29 @@ function pause(){
 	setProgress(1),
 	setPath("M-15-26v52L30 0z")
 }
-function move(){
+function update(){
 	if(!isPlaying)return;
+	analyser.getFloatTimeDomainData(sampleBuffer),
 	setProgress(2**((time-ctx.currentTime)/source.buffer.duration)),
-	requestAnimationFrame(move)
+	setPower(sampleBuffer.reduce((a,c)=>a+c*c,0)/analyser.fftSize),
+	requestAnimationFrame(update)
 }
 let $=(...s)=>document.querySelector(...s),
 	button=$("path"),
 	catcher=$("header"),
 	setProgress=n=>button.nextElementSibling.style.setProperty('--f',n),
+	setPower=p=>button.style.fill=`rgb(0 ${++p*200<<0} 0)`,
 	setPath=s=>button.setAttribute("d",s),
 	ctx=new AudioContext,
 	gainNode=ctx.createGain(),
+	analyser=ctx.createAnalyser(),
+	sampleBuffer=new Float32Array(analyser.fftSize),
 	isPlaying=0,
 	time=0;
-
 catcher.firstElementChild.addEventListener("change",e=>handleFileInput(e.target)),
 document.body.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
 document.body.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
 document.body.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
+analyser.connect(gainNode),
 gainNode.connect(ctx.destination),
 gainNode.gain.value=.125</script></body></html>
