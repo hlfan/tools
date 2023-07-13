@@ -1,9 +1,9 @@
-<html><head><title>Audio-Loopstation</title><style>
+<!DOCTYPE html><html><head><title>Audio-Loopstation</title><meta name="viewport" content="width=device-width, user-scalable=no"><meta name="theme-color" content="#0f0"/><style>
 body{accent-color:#0f0;background:#111;margin:0}
 svg{fill:#0f0;filter:opacity(.7)drop-shadow(0 0 3vmin #0f0);height:100%;width:100%}
-circle{fill:none;stroke:#0f0;stroke-dasharray:var(--p) var(--p);stroke-dashoffset:calc(var(--f)*var(--p));stroke-width:15;transform:rotate(-90deg)}
+circle{fill:none;stroke:#0f0;stroke-dasharray:var(--p) var(--p);stroke-dashoffset:calc(var(--f)*var(--p));stroke-width:16;transform:rotate(-90deg)}
 circle[style]{transition:all .5s ease-out;--p:314.159265359}
-div,header{inset:0;margin:auto;max-height:100vmin;max-width:100vmin;position:absolute}
+div,header{inset:0;margin:auto;max-height:calc(290vmin/3);max-width:calc(290vmin/3);position:absolute}
 div,header.selected{pointer-events:none}
 header{border-radius:50%;box-sizing:border-box;display:flex;mix-blend-mode:difference;padding:15vmin;transition:backdrop-filter.2s}
 header:not(.selected){backdrop-filter:brightness(9%)blur(5vmin)}.selected>*{display:none}
