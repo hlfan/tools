@@ -69,8 +69,8 @@ let $=(...s)=>document.querySelector(...s),
 	time=0;
 
 catcher.firstElementChild.addEventListener("change",e=>handleFileInput(e.target)),
-catcher.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
-catcher.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
-catcher.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
+document.body.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
+document.body.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
+document.body.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
 gainNode.connect(ctx.destination),
 gainNode.gain.value=.125</script></body></html>
