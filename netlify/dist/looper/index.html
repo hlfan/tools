@@ -28,7 +28,7 @@ button::before{content:'⏸️'}
 </svg><div>
 <input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/>
 <details open><summary><span></span><header/></summary><input type="file"></details>
-<button onclick="ctx.state=='running'?hold():clear();"/>
+<button/>
 </div><script>var audioBuffer,source;
 function handleFileInput(input){
 	if(!input.files.length)return;
@@ -97,6 +97,7 @@ let $=(...s)=>document.querySelector(...s),
 	rebuildSource=1,
 	time=0;
 $('input[type="file"]').addEventListener("change",e=>handleFileInput(e.target)),
+$('button').addEventListener("click",()=>ctx.state=='running'?hold():clear()),
 document.body.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
 document.body.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
 document.body.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
