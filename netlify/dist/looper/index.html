@@ -28,7 +28,7 @@ button::before{content:'⏸️'}
 </svg><div>
 <input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/>
 <details open><summary><span></span><header/></summary><input type="file"></details>
-<button onclick="isPlaying?hold():clear()"/>
+<button onclick="ctx.state=='running'?hold():clear()"/>
 </div><script>var audioBuffer,source;
 function handleFileInput(input){
 	if(!input.files.length)return;
@@ -38,18 +38,21 @@ function handleFileInput(input){
 	$("details").open=false,
 	reader.onload=async e=>{
 		audioBuffer=await ctx.decodeAudioData(e.target.result),
-		button.setAttribute("onclick","isPlaying?pause():play()"),
+		button.setAttribute("onclick","ctx.state=='running'?pause():play()"),
 		pause(),
 		setProgress(1)
 	},
 	reader.readAsArrayBuffer(input.files[0])
 }
 function play(){
-	isPlaying=1,
+	ctx.resume();
+	rebuildSource&&startNewSource(),
+	rebuildSource=1,
 	setPath("M-25-25h50v50h-50z"),
 	document.body.classList.remove("stopped"),
-	update();
-	if(ctx.state=='suspended')return ctx.resume();
+	update()
+}
+function startNewSource(){
 	source=ctx.createBufferSource(),
 	source.connect(analyser),
 	source.buffer=audioBuffer,
@@ -58,28 +61,28 @@ function play(){
 	source.start()
 }
 function pause(){
-	isPlaying&&source.stop(),
-	isPlaying=0;
+	rebuildSource&&source.stop(),
+	ctx.suspend();
 	if(!audioBuffer)return;
 	setProgress(1),
 	setPath("M-15-26v52L30 0z"),
 	document.body.classList.add("stopped")
 }
 function update(){
-	if(!isPlaying)return;
+	if(ctx.state!="running")return;
 	analyser.getFloatTimeDomainData(sampleBuffer),
 	setProgress(2**((time-ctx.currentTime)/audioBuffer.duration)),
 	setPower(sampleBuffer.reduce((a,c)=>a+c*c,0)/analyser.fftSize),
 	requestAnimationFrame(update)
 }
 function clear(){
+	rebuildSource=1,
 	analyser.disconnect(),
 	analyser=ctx.createAnalyser(),
 	analyser.connect(gainNode)
 }
 function hold(){
-	isPlaying=0;
-	ctx.suspend(),
+	rebuildSource=0;
 	pause();
 }
 let $=(...s)=>document.querySelector(...s),
@@ -92,7 +95,7 @@ let $=(...s)=>document.querySelector(...s),
 	gainNode=ctx.createGain(),
 	analyser=ctx.createAnalyser(),
 	sampleBuffer=new Float32Array(analyser.fftSize),
-	isPlaying=0,
+	rebuildSource=1,
 	time=0;
 $('input[type="file"]').addEventListener("change",e=>handleFileInput(e.target)),
 document.body.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
