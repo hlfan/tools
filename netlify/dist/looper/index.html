@@ -28,7 +28,7 @@ button::before{content:'⏸️'}
 </svg><div>
 <input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/>
 <details open><summary><span></span><header/></summary><input type="file"></details>
-<button onclick="ctx.state=='running'?hold():clear()"/>
+<button onclick="ctx.state=='running'?hold():clear();"/>
 </div><script>var audioBuffer,source;
 function handleFileInput(input){
 	if(!input.files.length)return;
@@ -45,12 +45,11 @@ function handleFileInput(input){
 	reader.readAsArrayBuffer(input.files[0])
 }
 function play(){
-	ctx.resume();
 	rebuildSource&&startNewSource(),
 	rebuildSource=1,
 	setPath("M-25-25h50v50h-50z"),
 	document.body.classList.remove("stopped"),
-	update()
+	ctx.resume().then(update)
 }
 function startNewSource(){
 	source=ctx.createBufferSource(),
@@ -61,10 +60,10 @@ function startNewSource(){
 	source.start()
 }
 function pause(){
-	rebuildSource&&source.stop(),
+	ctx.state=='running'&&rebuildSource&&source.stop(),
 	ctx.suspend();
 	if(!audioBuffer)return;
-	setProgress(1),
+	rebuildSource&&setProgress(1),
 	setPath("M-15-26v52L30 0z"),
 	document.body.classList.add("stopped")
 }
