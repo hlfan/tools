@@ -1,35 +1,41 @@
 <!DOCTYPE html><html><head><title>Audio-Loopstation</title><meta name="viewport" content="width=device-width, user-scalable=no"><meta name="theme-color" content="#0f0"/><style>
-body{accent-color:#0f0;background:#111;height:100vh;margin:0;overflow:hidden}
-svg{fill:#0f0;filter:opacity(.7)drop-shadow(0 0 3vmin #0f0);height:100%;width:100%}
-.stopped path{fill:#0f0!important}
-circle{fill:none;stroke:#0f0;stroke-dasharray:var(--p) var(--p);stroke-dashoffset:calc(var(--f)*var(--p));stroke-width:15;transform:rotate(-90deg)}
-circle[style]{transition:all .5s ease-out;--p:314.159265359}
-div{max-height:95vmin;max-width:95vmin;pointer-events:none}
-div,header{inset:0;margin:auto}
-div,header,input,button{position:absolute}
-input{cursor:pointer;pointer-events:all;zoom:4}
-input[type="range"]{-webkit-appearance:slider-vertical;inset:29% 73% 29% 19%;margin:0}
+body{--i:.5;--h:120deg;--c:hsl(var(--h),100%,calc(40% + 20%*var(--i)));accent-color:var(--c);background:#111;color-scheme:dark;height:100vh;margin:0;overflow:hidden;transition:accent-color 1s}
+svg{fill:var(--c);filter:opacity(.7)drop-shadow(0 0 3vmin var(--c));height:100%;width:100%}
+circle{fill:none;stroke:var(--c);stroke-dasharray:var(--p) var(--p);stroke-width:calc(14.5px + var(--i)*1px);transform:rotate(-90deg)}
+circle[style]{transition:stroke-dashoffset .5s ease-out;--p:314.159265359}
+div{max-height:95vmin;max-width:95vmin}
+div,header,footer::before{inset:0;margin:auto;pointer-events:none}
+div,header,input:not([step]),button,footer{position:absolute}
+input:not([step]){scale:4}
+input[type="range"]{-webkit-appearance:slider-vertical;appearance:slider-vertical;inset:0;max-height:10vmin;margin:auto 76% auto 22%}
 details{width:fit-content}
 summary{list-style:none}
-span,button{cursor:pointer;filter:sepia(1)hue-rotate(61deg)saturate(3);font-size:10vmin;pointer-events:all}
+path,div :empty:not(header){cursor:pointer;pointer-events:all}
+span,button{filter:sepia(1)hue-rotate(calc(var(--h) - 60deg))saturate(3);font-size:10vmin}
 :is(span,button):hover{filter:none}
 span::before{content:'📂'}
-[open] header{backdrop-filter:brightness(9%)blur(5vmin);pointer-events:all}
-header{border-radius:50%;mix-blend-mode:difference;padding:15vmin;transition:backdrop-filter.2s,background.2s}
-header.catching{background:#048c}
-input[type="file"]{color:#fff;height:fit-content;inset:3.75vmin;margin:auto;text-wrap:balance}
-input::file-selector-button{background:#0f0;border:solid #222 2px;border-radius:1ch;text-wrap:wrap;width:100%}
+[open] header{backdrop-filter:blur(5vmin);background:#000d;pointer-events:all}
+header{border-radius:50%;padding:15vmin;transition:backdrop-filter.2s,background.2s}
+header.catching{background:hsla(calc(var(--h) + 90deg),50%,calc(40% + 20%*var(--i)),50%)}
+header,input[type="file"]{z-index:1}
+input[type="file"]{color:#fff;color-scheme:light;height:fit-content;inset:3.75vmin;margin:auto;max-width:20%;text-wrap:balance}
+input::file-selector-button{background:var(--c);border:solid #222 2px;border-radius:1ch;text-wrap:wrap;width:100%}
 button{background:none;border:none;inset:auto 0 0 auto;padding:0}
 button::before{content:'⏸️'}
 .stopped button::before{content:'↩️'}
+footer{display:flex;inset:0;margin:74% auto auto;gap:5vmin;max-width:35%;max-height:7%}
+footer::before{color:#666;content:'-';font-size:5vmin;inset:0;max-width:1ch;position:absolute;text-align:center}
+input[step]{backdrop-filter:brightness(2)contrast(1.5);background:#fff1;border-radius:2vmin;font-size:4vmin;width:100%}
+::selection{background:var(--c)}
 </style></head><body><svg viewBox="-60 -60 120 120">
 <path d="M0 25c14 0 25-11 25-25S14-25 0-25-25-14-25 0s11 25 25 25"/>
 <circle r="50"/>
 </svg><div>
-<input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/>
 <details open><summary><span></span><header/></summary><input type="file"></details>
-<button/>
-</div><script>var audioBuffer,source;
+<input type="range" orient="vertical" oninput="gainNode.gain.value=this.value**3/1e6"/><footer>
+<input type="number" step="any" onchange="setLoop(this)" placeholder="Start"/>
+<input type="number" step="any" onchange="setLoop(this)" placeholder="End"/></footer>
+<button/></div><script>var source;
 function handleFileInput(input){
 	if(!input.files.length)return;
 	let reader=new FileReader();
@@ -37,7 +43,7 @@ function handleFileInput(input){
 	catcher.classList.remove("catching"),
 	$("details").open=false,
 	reader.onload=async e=>{
-		audioBuffer=await ctx.decodeAudioData(e.target.result),
+		dummy.buffer=await ctx.decodeAudioData(e.target.result),
 		button.setAttribute("onclick","ctx.state=='running'?pause():play()"),
 		pause(),
 		setProgress(1)
@@ -48,29 +54,28 @@ function play(){
 	rebuildSource&&startNewSource(),
 	rebuildSource=1,
 	setPath("M-25-25h50v50h-50z"),
-	document.body.classList.remove("stopped"),
+	b.classList.remove("stopped"),
 	ctx.resume().then(update)
 }
 function startNewSource(){
 	source=ctx.createBufferSource(),
 	source.connect(analyser),
-	source.buffer=audioBuffer,
-	source.loop=1,
+	Object.assign(source,dummy),
 	time=ctx.currentTime,
 	source.start()
 }
 function pause(){
 	ctx.state=='running'&&rebuildSource&&source.stop(),
 	ctx.suspend();
-	if(!audioBuffer)return;
+	if(!dummy.buffer)return;
 	rebuildSource&&setProgress(1),
 	setPath("M-15-26v52L30 0z"),
-	document.body.classList.add("stopped")
+	b.classList.add("stopped")
 }
 function update(){
 	if(ctx.state!="running")return;
 	analyser.getFloatTimeDomainData(sampleBuffer),
-	setProgress(2**((time-ctx.currentTime)/audioBuffer.duration)),
+	setProgress(2**((time-ctx.currentTime)/((dummy.loopEnd||dummy.buffer.duration)-(dummy.loopStart||0)))),
 	setPower(sampleBuffer.reduce((a,c)=>a+c*c,0)/analyser.fftSize),
 	requestAnimationFrame(update)
 }
@@ -85,22 +90,27 @@ function hold(){
 	pause();
 }
 let $=(...s)=>document.querySelector(...s),
+	b=document.body,
 	button=$("path"),
 	catcher=$("header"),
-	setProgress=n=>button.nextElementSibling.style.setProperty('--f',Math.round(n*1e6)/1e6),
-	setPower=p=>button.style.fill=`rgb(0 ${(Math.sqrt(p)/2+1)*200<<0} 0)`,
+	mod=(n,m=dummy.buffer.duration)=>(parseFloat(n)%m+m)%m,
+	setLoop=i=>(dummy['loop'+i.placeholder]=mod(i.value)||0,{buffer,...r}=dummy,Object.assign(source,r)),
+	setProgress=n=>button.nextElementSibling.style.strokeDashoffset=Math.round(Math.PI*n*1e8)/1e6,
+	setPower=p=>b.style.setProperty('--i',2*Math.sqrt(p)),
 	setPath=s=>button.setAttribute("d",s),
 	ctx=new AudioContext,
 	gainNode=ctx.createGain(),
 	analyser=ctx.createAnalyser(),
 	sampleBuffer=new Float32Array(analyser.fftSize),
+	dummy={loop:1},
 	rebuildSource=1,
 	time=0;
 $('input[type="file"]').addEventListener("change",e=>handleFileInput(e.target)),
 $('button').addEventListener("click",()=>ctx.state=='running'?hold():clear()),
-document.body.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
-document.body.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
-document.body.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
+b.addEventListener("dragover",e=>e.preventDefault()||catcher.classList.add("catching")),
+b.addEventListener("dragleave",()=>catcher.classList.remove("catching")),
+b.addEventListener("drop",e=>e.preventDefault()||handleFileInput(e.dataTransfer)),
 analyser.connect(gainNode),
 gainNode.connect(ctx.destination),
-gainNode.gain.value=.125</script></body></html>
+gainNode.gain.value=.125,
+b.style.setProperty('--h',Math.round(Math.random()*360)+'deg')</script></body></html>
