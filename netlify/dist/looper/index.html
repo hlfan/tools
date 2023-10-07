@@ -37,18 +37,27 @@ input[step]{backdrop-filter:brightness(2)contrast(1.5);background:#fff1;border-r
 <input type="number" step="any" onchange="setLoop(this)" placeholder="End"/></footer>
 <button/></div><script>var source;
 function handleFileInput(input){
-	if(!input.files.length)return;
-	let reader=new FileReader();
 	pause(),
 	catcher.classList.remove("catching"),
-	$("details").open=false,
-	reader.onload=async e=>{
-		dummy.buffer=await ctx.decodeAudioData(e.target.result),
-		button.setAttribute("onclick","ctx.state=='running'?pause():play()"),
-		pause(),
-		setProgress(1)
-	},
-	reader.readAsArrayBuffer(input.files[0])
+	$("details").open=false;
+	if(input.files.length)handleInputFile(input.files);
+	if([...input.items].some(i=>i.type=="text/uri-list"))handleInputURL(input.getData("URL"));
+}
+function handleInputFile(files) {
+	let reader=new FileReader();
+	reader.onload=e=>loadBuffer(e.target.result),
+	reader.readAsArrayBuffer(files[0])
+}
+async function handleInputURL(text) {
+	let link=new URL(text),
+		resp=await fetch('//cors-anywhere.herokuapp.com/'+link.href,{headers:{'x-requested-with':link.host}});
+	loadBuffer(await resp.arrayBuffer())
+}
+async function loadBuffer(buffer) {
+	dummy.buffer=await ctx.decodeAudioData(buffer),
+	button.setAttribute("onclick","ctx.state=='running'?pause():play()"),
+	pause(),
+	setProgress(1)
 }
 function play(){
 	rebuildSource&&startNewSource(),
