@@ -74,7 +74,7 @@ function startNewSource(){
 	source.start()
 }
 function pause(){
-	ctx.state=='running'&&rebuildSource&&source.stop(),
+	ctx.state=='running'&&rebuildSource&&source?.stop(),
 	ctx.suspend();
 	if(!dummy.buffer)return;
 	rebuildSource&&setProgress(1),
