@@ -50,7 +50,7 @@ function handleInputFile(files) {
 }
 async function handleInputURL(text) {
 	let link=new URL(text),
-		resp=await fetch('//cors-anywhere.herokuapp.com/'+link.href,{headers:{'x-requested-with':link.host}});
+		resp=await fetch('//api.codetabs.com/v1/proxy/?quest='+link.href,{headers:{'x-requested-with':link.host}});
 	loadBuffer(await resp.arrayBuffer())
 }
 async function loadBuffer(buffer) {
