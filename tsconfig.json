@@ -11,5 +11,6 @@
 	"exclude": [
 		"node_modules",
 		"netlify/edge-functions/ytthumb/ytthumb.ts"
-	]
+	],
+	"moduleResolution": "nodenext"
 }
