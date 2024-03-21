@@ -1,11 +1,11 @@
 {
 	"name": "toolz",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"scripts": {
 		"build": "tsc -p ."
 	},
 	"devDependencies": {
-		"@types/node": "^18.15.10",
+		"@types/node": "^20.11.1",
 		"typescript": "^5.0.2"
 	},
 	"dependencies": {
