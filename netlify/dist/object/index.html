@@ -5,33 +5,59 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script>
 			const updateColorScheme = (s = document.body.style) => s.setProperty("--hue", (parseFloat(s.getPropertyValue("--hue")) + 60 + Math.random() * 240 || Math.random() * 360) % 360);
+			const svgns="http://www.w3.org/2000/svg";
 			let audio = (ctx = null);
 			setTimeout(async () => (audio = await (await fetch("remix.mp3")).arrayBuffer()), 0);
+			setTimeout(async () => (keyframes = await (await fetch("keyframes.json")).json()), 0);
 			document.title = {};
 			async function init() {
 				document.body.onclick = null;
 				ctx = new AudioContext();
 				source = ctx.createBufferSource();
 				source.buffer = await ctx.decodeAudioData(audio);
+				source.startTime = ctx.currentTime;
 				source.loop = 1;
 				source.connect(ctx.destination);
 				source.start();
-				setInterval(updateColorScheme, 6000 / 13);
-				updateColorScheme();
+				beathandler();
+			}
+			function beathandler() {
+				beat = Math.round((ctx.currentTime - source.startTime) * 26 / 3);
+				if (beat % 4 == 0) updateColorScheme();
+				updateText(keyframes[beat % 32]);
+				setTimeout(beathandler, ((beat + 2) * 3 / 26 - ctx.currentTime) * 1000);
+			}
+			function updateText(data) {
+				if (data == null) return;
+				let g = document.getElementsByTagName('g')[0];
+				while (g.childElementCount > data.length) g.removeChild(g.lastChild);
+				while (g.childElementCount < data.length) g.appendChild(document.createElementNS(svgns,'text'));
+				for (let [i, item] of data.entries()) {
+					let text = g.children[i];
+					text.textContent = {};
+					for (let l of ['x', 'y', 'z']) {
+						if (item[l] == undefined) continue;
+						text.style.setProperty('--' + l, item[l]);
+					}
+				}
 			}
 		</script>
 		<style>
-			html {
+			html, body, svg {
 				color-scheme: dark;
 				height: 100%;
+				overflow: visible;
+				position: absolute;
+				width: 100%;
 			}
 			body {
 				background: hwb(calc(1deg * var(--hue)) 0 90);
-				color: hwb(calc(1deg * var(--hue)) 0 0);
+				fill: hwb(calc(1deg * var(--hue)) 0 0);
 				font-family: "Impact";
-				font-size: 60vw;
+				font-size: calc(100vw/6);
 				margin: 0;
 				overflow: hidden;
+				stroke: hwb(calc(1deg * var(--hue)) -190 0);
 				text-wrap: nowrap;
 				&:not([style]) {
 					animation: rotateHue 11s infinite;
@@ -39,11 +65,19 @@
 					background-image: linear-gradient(0deg, #f00, #0f0), linear-gradient(120deg, #f00, #00f), linear-gradient(240deg, #0f0, #00f), radial-gradient(#fff, #000);
 				}
 			}
-			span {
+			text {
+				alignment-baseline: middle;
 				filter: drop-shadow(0 0 0.05ch hwb(calc(1deg * var(--hue)) 30 0/75%));
-				font-size: min(0.5ch, 100vh);
-				position: absolute;
-				top: -0.3ch;
+				font-size: min(var(--z)*1em, 100vh);
+				mix-blend-mode: difference;
+				paint-order: stroke;
+				stroke-width: 0.16ch;
+				text-anchor: middle;
+				text-shadow: 0 0 0.2ch black;
+				translate: calc(100%*var(--x) + 3em - 6em*var(--x)) calc(100%*var(--y) + 1ch - 1.9ch*var(--y));
+				--x: 0.5;
+				--y: 0.5;
+				--z: 1;
 			}
 			@keyframes rotateHue {
 				from {
@@ -61,13 +95,13 @@
 			}
 		</style>
 	</head>
-	<body onclick="for (span of document.querySelectorAll('span')) span.textContent = {};init()">
-		<span></span>
+	<body onclick="init()">
 		<svg>
 			<filter id="equalize-brightness">
 				<feColorMatrix values="0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 1 0" result="gray" in="SourceGraphic"></feColorMatrix>
 				<feBlend mode="color" in="SourceGraphic" in2="gray"></feBlend>
 			</filter>
+			<g><text></text></g>
 		</svg>
 	</body>
 </html>
