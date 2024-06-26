@@ -6,14 +6,20 @@
 		<meta name="description" content="{}">
 		<script>
 			const svgns = "http://www.w3.org/2000/svg";
-			let audio = (ctx = null);
-			setTimeout(async () => (audio = await (await fetch("remix.mp3")).arrayBuffer()), 0);
-			setTimeout(async () => (keyframes = await (await fetch("keyframes.json")).json()), 0);
+			let audio = (ctx = (keyframes = null));
+			setTimeout(load, 0);
 			let replacements = [[], [["Ob", "In"]], [["( \\w{2})\\w+", "$1"]], [["\\b]", "ion]"]], [["\\b]", "ive]"]]];
 			document.title = {};
 			document.querySelector('meta[name^="d"]').content = {};
+			async function load() {
+				[audio, keyframes] = await Promise.all([
+					fetch("remix.mp3").then(r => r.arrayBuffer()),
+					fetch("keyframes.json").then(r => r.json())
+				]);
+				document.body.addEventListener("click", init);
+			}
 			async function init() {
-				document.body.onclick = null;
+				document.body.removeEventListener("click", init);
 				ctx = new AudioContext();
 				source = ctx.createBufferSource();
 				source.buffer = await ctx.decodeAudioData(audio);
@@ -103,7 +109,7 @@
 			}
 		</style>
 	</head>
-	<body onclick="init()">
+	<body>
 		<svg>
 			<filter id="equalize-brightness">
 				<feColorMatrix type="saturate" values="0" result="gray"/>
