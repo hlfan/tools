@@ -3,14 +3,15 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="{}">
 		<script>
-			const updateColorScheme = (s = document.body.style) => s.setProperty("--hue", (parseFloat(s.getPropertyValue("--hue")) + 60 + Math.random() * 240 || Math.random() * 360) % 360);
 			const svgns = "http://www.w3.org/2000/svg";
 			let audio = (ctx = null);
 			setTimeout(async () => (audio = await (await fetch("remix.mp3")).arrayBuffer()), 0);
 			setTimeout(async () => (keyframes = await (await fetch("keyframes.json")).json()), 0);
-			let replacements = [[], [["Ob", "In"]], [["(?=\\w{4}])\\w+", ""]], [["\\b]", "ion]"]], [["\\b]", "ive]"]]];
+			let replacements = [[], [["Ob", "In"]], [["( \\w{2})\\w+", "$1"]], [["\\b]", "ion]"]], [["\\b]", "ive]"]]];
 			document.title = {};
+			document.querySelector('meta[name^="d"]').content = {};
 			async function init() {
 				document.body.onclick = null;
 				ctx = new AudioContext();
@@ -28,14 +29,20 @@
 				updateText(keyframes[beat++ % keyframes.length]);
 				setTimeout(beathandler, (++beat * 3 / 26 - ctx.currentTime) * 1000);
 			}
+			function updateColorScheme(s = document.body.style) {
+				let prev = parseFloat(s.getPropertyValue("--hue")) || Math.random() * 360,
+					next = prev + 60 + Math.random() * 240;
+				s.setProperty("--hue", Math.floor(100 * next % 36000) / 100);
+			}
 			function updateText(data) {
 				if (data == null) return;
 				let g = document.getElementsByTagName('g')[0];
 				while (g.childElementCount > data.length) g.removeChild(g.lastChild);
 				while (g.childElementCount < data.length) g.appendChild(document.createElementNS(svgns, 'text'));
-				let tt = data.some(k => k.t) ? data.filter(k => k.t)[0].t : 0;
+				let tt = data.some(k => k?.t) ? data.filter(k => k?.t)[0].t : 0;
 				for (let [i, item] of data.entries()) {
 					let text = g.children[i];
+					if (!item) continue;
 					text.textContent = (replacements[tt] || []).reduce((a, c) => a.replaceAll(new RegExp(c[0], 'g'), c[1]), '' + {});
 					for (let l of ['x', 'y', 'z']) {
 						if (item[l] == undefined) continue;
@@ -99,8 +106,8 @@
 	<body onclick="init()">
 		<svg>
 			<filter id="equalize-brightness">
-				<feColorMatrix values="0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 1 0" result="gray" in="SourceGraphic"></feColorMatrix>
-				<feBlend mode="color" in="SourceGraphic" in2="gray"></feBlend>
+				<feColorMatrix type="saturate" values="0" result="gray"/>
+				<feBlend mode="color" in="SourceGraphic" in2="gray"/>
 			</filter>
 			<g><text></text></g>
 		</svg>
