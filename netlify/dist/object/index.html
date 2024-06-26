@@ -25,8 +25,8 @@
 			function beathandler() {
 				beat = Math.round((ctx.currentTime - source.startTime) * 26 / 3);
 				if (beat % 4 == 0) updateColorScheme();
-				updateText(keyframes[beat % keyframes.length]);
-				setTimeout(beathandler, ((beat + 2) * 3 / 26 - ctx.currentTime) * 1000);
+				updateText(keyframes[beat++ % keyframes.length]);
+				setTimeout(beathandler, (++beat * 3 / 26 - ctx.currentTime) * 1000);
 			}
 			function updateText(data) {
 				if (data == null) return;
@@ -59,7 +59,7 @@
 				font-size: calc(100vw/6);
 				margin: 0;
 				overflow: hidden;
-				stroke: hwb(calc(1deg * var(--hue)) -190 0);
+				stroke: hwb(calc(1deg * var(--hue)) 0 50);
 				text-wrap: nowrap;
 				&:not([style]) {
 					animation: rotateHue 11s infinite;
@@ -68,7 +68,7 @@
 				}
 			}
 			text {
-				alignment-baseline: middle;
+				dominant-baseline: middle;
 				filter: drop-shadow(0 0 0.05ch hwb(calc(1deg * var(--hue)) 30 0/75%));
 				font-size: min(var(--z)*1em, 100vh);
 				paint-order: stroke;
