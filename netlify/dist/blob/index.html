@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="description" content="a blob">
+	<script>
+		document.addEventListener("mousemove", e =>
+			document.body.style.setProperty("--pbg", `lab(50 ${
+				[e.clientX / innerWidth, e.clientY / innerHeight]
+					.map(v => 50 * Math.asin(2 * v - 1))
+					.join(" ")
+			})`)
+		);
+		window.DeviceMotionEvent && window.addEventListener("devicemotion", e => 
+			e.accelerationIncludingGravity && (
+				{x, y, z} = e.accelerationIncludingGravity, 
+				document.body.style.setProperty("--abg", `rgb(${
+					[x, y, z]
+					.map(v => 10 * v + 128)
+					.join(" ")
+				})`)
+			)
+		);
+	</script>
+	<style>
+		body,
+		html {
+			height: 100%
+		}
+		body {
+			animation: rotateHue 11s infinite;
+			background-blend-mode: overlay;
+			background-image: linear-gradient(0deg, red, #0f0), linear-gradient(144deg, red, #00f), linear-gradient(216deg, #0f0, #00f), linear-gradient(72deg, var(--pbg), var(--pbg)), linear-gradient(288deg, var(--abg), var(--abg)), radial-gradient(circle, #fff, #000);
+			margin: 0;
+			--abg: #808080;
+			--pbg: lab(50 0 0);
+		}
+		@keyframes rotateHue {
+			from {background-color: #974}
+			33.3% {background-color:#848}
+			66.7% {background-color:#487}
+			100% {background-color: #974}
+		}
+	</style>
+</head>
+</html>
