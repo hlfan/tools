@@ -12,6 +12,7 @@
 			let audio = (ctx = (keyframes = null)),
 				replacements = [[], [["Ob", "In"]], [["( \\w{2})\\w+", "$1"]], [["\\b]", "ion]"]], [["\\b]", "ive]"]]],
 				lastHandledBeat = -1;
+			document.addEventListener('DOMContentLoaded', _ => document.body.lastElementChild.addEventListener('mousemove', (e) => document.body.firstElementChild.contentDocument.dispatchEvent(new MouseEvent(e.type, {clientX: e.clientX, clientY: e.clientY}))))
 			async function load() {
 				[audio, keyframes] = await Promise.all([
 					fetch("remix.mp3").then(r => r.arrayBuffer()),
