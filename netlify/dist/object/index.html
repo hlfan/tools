@@ -22,6 +22,7 @@
 			async function init() {
 				if (document.readyState != "complete") return;
 				document.body.removeEventListener("click", init);
+				document.body.removeChild(document.body.firstElementChild);
 				ctx = new AudioContext();
 				source = ctx.createBufferSource();
 				source.buffer = await ctx.decodeAudioData(audio);
@@ -63,10 +64,10 @@
 			}
 		</script>
 		<style>
-			html, body, svg {
+			html, body, body>* {
+				border: none;
 				color-scheme: dark;
 				height: 100%;
-				overflow: visible;
 				position: absolute;
 				width: 100%;
 			}
@@ -76,14 +77,8 @@
 				font-family: "Impact";
 				font-size: calc(100vw/6);
 				margin: 0;
-				overflow: hidden;
 				stroke: hwb(calc(1deg * var(--hue)) 0 50);
 				text-wrap: nowrap;
-				&:not([style]) {
-					animation: rotateHue 11s infinite;
-					background-blend-mode: overlay;
-					background-image: linear-gradient(0deg, #f00, #0f0), linear-gradient(120deg, #f00, #00f), linear-gradient(240deg, #0f0, #00f), radial-gradient(circle, #fff, #000);
-				}
 			}
 			text {
 				dominant-baseline: middle;
@@ -98,23 +93,10 @@
 				--y: 0.5;
 				--z: 1;
 			}
-			@keyframes rotateHue {
-				from {
-					background-color: #974;
-				}
-				33.3% {
-					background-color: #848;
-				}
-				66.7% {
-					background-color: #487;
-				}
-				100% {
-					background-color: #974;
-				}
-			}
 		</style>
 	</head>
 	<body>
+		<iframe src="../blob"></iframe>
 		<svg>
 			<filter id="equalize-brightness">
 				<feColorMatrix type="saturate" values="0" result="gray"/>
