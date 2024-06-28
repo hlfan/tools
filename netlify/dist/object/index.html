@@ -11,8 +11,9 @@
 			const svgns = "http://www.w3.org/2000/svg";
 			let audio = (ctx = (keyframes = null)),
 				replacements = [[], [["Ob", "In"]], [["( \\w{2})\\w+", "$1"]], [["\\b]", "ion]"]], [["\\b]", "ive]"]]],
-				lastHandledBeat = -1;
-			document.addEventListener('DOMContentLoaded', _ => document.body.lastElementChild.addEventListener('mousemove', (e) => document.body.firstElementChild.contentDocument.dispatchEvent(new MouseEvent(e.type, {clientX: e.clientX, clientY: e.clientY}))))
+				lastHandledBeat = -1,
+				forwardEvent = e => document.body.firstElementChild.contentDocument.dispatchEvent(new MouseEvent(e.type, {clientX: e.clientX, clientY: e.clientY}));
+			document.addEventListener('DOMContentLoaded', _ => document.body.addEventListener('mousemove', forwardEvent))
 			async function load() {
 				[audio, keyframes] = await Promise.all([
 					fetch("remix.mp3").then(r => r.arrayBuffer()),
@@ -23,6 +24,7 @@
 			async function init() {
 				if (document.readyState != "complete") return;
 				document.body.removeEventListener("click", init);
+				document.body.removeEventListener('mousemove', forwardEvent);
 				document.body.removeChild(document.body.firstElementChild);
 				ctx = new AudioContext();
 				source = ctx.createBufferSource();
