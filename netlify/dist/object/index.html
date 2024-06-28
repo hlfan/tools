@@ -22,7 +22,7 @@
 			async function init() {
 				if (document.readyState != "complete") return;
 				document.body.removeEventListener("click", init);
-				document.body.removeChild(document.body.lastElementChild);
+				document.body.removeChild(document.body.firstElementChild);
 				ctx = new AudioContext();
 				source = ctx.createBufferSource();
 				source.buffer = await ctx.decodeAudioData(audio);
@@ -96,6 +96,7 @@
 		</style>
 	</head>
 	<body>
+		<iframe src="../blob/"></iframe>
 		<svg>
 			<filter id="equalize-brightness">
 				<feColorMatrix type="saturate" values="0" result="gray"/>
@@ -103,6 +104,5 @@
 			</filter>
 			<g><text></text></g>
 		</svg>
-		<iframe src="../blob/"></iframe>
 	</body>
 </html>
