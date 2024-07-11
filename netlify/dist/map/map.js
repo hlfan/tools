@@ -87,10 +87,10 @@ function init() {
 		subdomains: ["", 0, 1, 2, 3, 4, 5, 6, 7]
 	});
 	defop.TomTom = {
-		attrPromise: fetch("//api.tomtom.com/map/2/copyrights/caption.json?key=ubt9PGyNq8wzeyUTXPwzJiWjATs9eUSn").then(r => r.json()),
+		attrPromise: fetch("//api.tomtom.com/map/2/copyrights/caption.json?key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl").then(r => r.json()),
 		defaultAttribution: ["TomTom"],
 		fetchAttribution: async ({ attrPromise }) => [(await attrPromise).copyrightsCaption],
-		key: "ubt9PGyNq8wzeyUTXPwzJiWjATs9eUSn",
+		key: "xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl",
 		tmpURL: (layer, format) => `//{s}api.tomtom.com/map/1/tile/${layer}/main/{z}/{x}/{y}.${format}?key={key}`,
 		subdomains: ["", "a.", "b.", "c.", "d."]
 	}
