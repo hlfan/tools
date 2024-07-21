@@ -136,7 +136,7 @@ function init() {
 		subdomains: ["", "-eu"],
 		zoomOffset: -1
 	});
-	maps.Omniscale = L.tileLayer("//maps.omniscale.net/v2/roundup-6d84ce00/style.default/layers.admin,roads,labels,housenumbers,pois/{z}/{x}/{y}.png", {
+	maps.Omniscale = L.tileLayer("//maps.omniscale.net/v2/roundup-9e599d79/style.default/layers.admin,roads,labels,housenumbers,pois/{z}/{x}/{y}.png", {
 		defaultAttribution: ['<a href="//maps.omniscale.com">Omniscale</a>', '<a href="//osm.org/copyright">OpenStreetMap</a> contributors'],
 		fetchAttribution: ({ defaultAttribution }) => defaultAttribution,
 		maxZoom: 22,
