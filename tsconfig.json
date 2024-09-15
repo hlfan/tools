@@ -12,5 +12,5 @@
 		"node_modules",
 		"netlify/edge-functions/ytthumb/ytthumb.ts"
 	],
-	"moduleResolution": "nodenext"
+	"moduleResolution": "node16"
 }
