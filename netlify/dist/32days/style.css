@@ -1,0 +1,78 @@
+html {
+	background: #333;
+	color-scheme: dark;
+	color: #ccc;
+}
+body {
+	display: grid;
+	gap: 1em;
+	font-family: Helvetica;
+	font-weight: bold;
+	font-size: 200%;
+}
+body>div {
+	max-width: 90vw;
+	margin: auto;
+}
+.ui {
+	display: grid;
+	gap: 1em;
+	justify-items: center;
+}
+h1 {
+	text-align: center;
+	margin-bottom: 0;
+}
+button.start {
+	border-radius: 9em;
+	color: #ccc;
+	background: #242;
+	font-size: 200%;
+	width: 7ch;
+}
+button.start:disabled {
+	background: #777;
+}
+span {
+	font-variant: tabular-nums;
+}
+.matches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1ch;
+	justify-content: center;
+}
+.match {
+	width: fit-content;
+}
+.word {
+	display: flex;
+	gap: .4ch;
+	margin-bottom: .4ch;
+}
+[data-letter] {
+	display: inline-grid;
+	width: 1em;
+	background: #111;
+	color: #ccc;
+	height: 1em;
+	border-radius: .3ch;
+	place-content: center;
+	transition: .5s;
+	padding: 0.2ch;
+	transform: translateX(calc(2.6ch * var(--order-1, 0)));
+	text-transform: capitalize;
+}
+[data-letter]::before {
+	content: attr(data-letter);
+}
+[data-variant-count="2"] [data-letter] {
+	animation: swapOrder 4s infinite;
+}
+@keyframes swapOrder {
+	0% {transform: translateX(calc(2.6ch * var(--order-1, 0)));}
+	40%{transform: translateX(calc(2.6ch * var(--order-1, 0)));}
+	50%{transform: translateX(calc(2.6ch * var(--order-2, 0)));}
+	90%{transform: translateX(calc(2.6ch * var(--order-2, 0)));}
+	to {transform: translateX(calc(2.6ch * var(--order-1, 0)));}
+}
