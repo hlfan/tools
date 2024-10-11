@@ -10,10 +10,10 @@
 			}
 		</style>
 		<script>
-			let addVid=a=>{
+			let addVid=([link,place])=>{
 				let b=document.createElement("iframe");
-				b.src=`//youtube.com/embed/${a[0]}?autoplay=1&mute=1`;
-				b.style.gridArea=a[1];
+				b.src=`//youtube.com/embed/${link}?autoplay=1&mute=1`;
+				b.style.gridArea=place;
 				b.allow="autoplay; encrypted-media; picture-in-picture";
 				b.allowFullscreen=!0;
 				document.body.append(b)
