@@ -6,7 +6,7 @@ html {
 body {
 	display: grid;
 	gap: 1em;
-	font-family: Helvetica;
+	font-family: monospace;
 	font-weight: bold;
 	font-size: 200%;
 }
