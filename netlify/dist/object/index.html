@@ -12,7 +12,8 @@
 			let audio = (ctx = (keyframes = null)),
 				replacements = [[], [["Ob", "In"]], [["( \\w{2})\\w+", "$1"]], [["\\b]", "ion]"]], [["\\b]", "ive]"]]],
 				lastHandledBeat = -1,
-				forwardEvent = e => document.body.firstElementChild.contentDocument.dispatchEvent(new MouseEvent(e.type, {clientX: e.clientX, clientY: e.clientY}));
+				forwardEvent = e => document.body.firstElementChild.contentDocument.dispatchEvent(new MouseEvent(e.type, {clientX: e.clientX, clientY: e.clientY})),
+				czvar = decodeURIComponent(location.href.split(location.pathname)[1]).includes('🇨🇿');
 			document.addEventListener('DOMContentLoaded', _ => document.body.addEventListener('mousemove', forwardEvent))
 			async function load() {
 				[audio, keyframes] = await Promise.all([
@@ -58,7 +59,9 @@
 				for (let [i, item] of data.entries()) {
 					let text = g.children[i];
 					if (!item) continue;
-					text.textContent = (replacements[tt] || []).reduce((a, c) => a.replaceAll(new RegExp(c[0], 'g'), c[1]), '' + {});
+					let replacarr = (replacements[tt] || []);
+					if (czvar) replacarr.push(['j','cz'],['ct\\b','ch'],['ct','cht'])
+					text.textContent = replacarr.reduce((a, c) => a.replaceAll(new RegExp(c[0], 'g'), c[1]), '' + {});
 					for (let l of ['x', 'y', 'z']) {
 						if (item[l] == undefined) continue;
 						text.style.setProperty('--' + l, item[l]);
