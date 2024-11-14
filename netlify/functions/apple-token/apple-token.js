@@ -18,6 +18,4 @@ export default async (request) => {
 
 	fs.writeFileSync('../../dist/apple-token.json', JSON.stringify(out));
 	console.log(`Cached token for until ${new Date(expiresAt)}. Next run at ${ ${new Date(next_run)}}`);
-};
-
-export const config = { schedule: "*/20 * * * *" };
+}
