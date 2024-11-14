@@ -15,24 +15,24 @@ function init() {
 		pane: "overlayPane"
 	});
 	defop.Apple = {
-		defattr: tileSource => [`<a href="${[...new Set(appleBootstrap.bootstrap.attributions.filter(a=>a.attributionId==appleBootstrap.bootstrap.tileSources[tileSource].attributionId)[0].global.map(a=>a.url))][0]}">Apple</a>`],
+		defattr: tileSource => [`<a href="${appleBootstrap.attributions[appleBootstrap.tiles[tileSource].attributionId][0]}">Apple</a>`],
 		fetchAttribution: () => maps.Apple.options.defaultAttribution,
-		key: data => encodeURIComponent(appleBootstrap.bootstrap.accessKey),
+		key: data => encodeURIComponent(appleBootstrap.accessKey),
 		maxZoom: 22,
 		subdomains: ["", 1, 2, 3, 4],
 		tmpURL: (cdn, path, style) => `//${cdn}cdn{s}.apple-mapkit.com/${path}tile?x={x}&y={y}&z={z}&v={v}&accessKey={key}&style=${style}`,
-		v: data => appleBootstrap.bootstrap.tileSources[data.tileSource].path.match(/v=(\d+)/)[1]
+		v: data => appleBootstrap.tiles[data.tileSource].v
 	}
 	imagery.Apple = L.tileLayer(defop.Apple.tmpURL("sat-", "", "7"), {
 		...defop.Apple,
-		defaultAttribution: defop.Apple.defattr(2),
-		tileSource: 2
+		defaultAttribution: defop.Apple.defattr('satellite'),
+		tileSource: 'satellite'
 	});
 	maps.Apple = L.tileLayer(defop.Apple.tmpURL("", "ti/", "46&size=1&scale=1&poi=1"), {
 		...defop.Apple,
-		defaultAttribution: defop.Apple.defattr(1),
+		defaultAttribution: defop.Apple.defattr('hybrid-overlay'),
 		pane: "overlayPane",
-		tileSource: 1
+		tileSource: 'hybrid-overlay'
 	});
 	defop.Esri = {
 		defaultAttribution: ["Esri"],
@@ -162,15 +162,8 @@ async function fetchBingAttribution(e) {
 	return arr;
 }
 async function fetchAppleBootstrap() {
-	let cacheURL = '//requestbin-api.pipedream.com/api/v2/events/en0qt2p91gma2',
-		tokenCache = await fetch(cacheURL).then(r => r.json());
-	return tokenCache.data
-		.map(l => l.step.data.body)
-		.filter(l => l)
-		.map(atob)
-		.map(JSON.parse)
-		.filter(l => l.bootstrap.environment == 'MapsWebProd' && l.expiresAt > Date.now())
-		.at(-1);
+	let url = '//corsproxy.io/?https%3A%2F%2Frlim.com%2FpeFvU8QrUZ%2Fraw';
+	return await fetch(url).then(r => r.json());
 }
 let map = L.map("map", {
 		center: [48.2, 16.4],
