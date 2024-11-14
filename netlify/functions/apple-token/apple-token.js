@@ -16,6 +16,6 @@ exports.handler = async (request) => {
 			attributions: Object.fromEntries(bootstrap.attributions.map(attributionsMapper))
 		};
 
-	fs.writeFileSync('../../dist/apple-token.json', JSON.stringify(out));
+	fs.writeFileSync('./cached/apple-token.json', JSON.stringify(out));
 	console.log(`Cached token for until ${new Date(expiresAt)}. Next run at ${ ${new Date(next_run)}}`);
 }
