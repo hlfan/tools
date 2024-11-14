@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-export default async (request) => {
+exports.handler = async (request) => {
 	let { next_run } = await request.json(),
 		tokenResponse = await fetch('https://maps.apple.com/place/mwtoken'),
 		token = await tokenResponse.text(),
