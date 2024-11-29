@@ -173,7 +173,7 @@ let map = L.map("map", {
 	maps = {},
 	imagery = {},
 	appleBootstrap = null,
-	refreshAppleBootstrap = () => fetchAppleBootstrap().then(b => appleBootstrap = b).then(() => setTimeout(refreshAppleBootstrap, appleBootstrap.expiresAt - Date.now())),
+	refreshAppleBootstrap = () => fetchAppleBootstrap().then(b => appleBootstrap = b).then(() => setTimeout(refreshAppleBootstrap, appleBootstrap.expiresAt - Date.now() || 7**5 )),
 	pairify = arr => arr.reduce((a, c, i, r) => i % 2 ? a.push([r[i - 1], c]) && a : a, []);
 map.attributionControl._update = function() {
 	let layerPromises = [],
