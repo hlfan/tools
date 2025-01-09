@@ -162,8 +162,12 @@ async function fetchBingAttribution(e) {
 	return arr;
 }
 async function fetchAppleBootstrap() {
-	let url = '//corsproxy.io/?https%3A%2F%2Frlim.com%2FpeFvU8QrUZ%2Fraw';
-	return await fetch(url).then(r => r.json());
+	let url = 'https://corsproxy.io/?' + encodeURIComponent('https://requestinspector.com/inspector/01jh6bwgngga6hbk6zxhfbhhsj00-ead9772ee65e95c05172') + '?',
+		headers = { accept: "text/html,application/xhtml+xml,application/xml" },
+		txt = await fetch(url, { headers }).then(r => r.text()),
+		matches = [...txt.matchAll(/body[^.]*:"([^*]+accessKey[^*]+?)",[^\\]/g)],
+		straps = matches.map(l => JSON.parse(l[1].replaceAll('\\', '')));
+	return straps.reduce((p, c) => p.accessKey.split('_')[0] > c.accessKey.split('_')[0] ? p : c);
 }
 let map = L.map("map", {
 		center: [48.2, 16.4],
@@ -173,7 +177,7 @@ let map = L.map("map", {
 	maps = {},
 	imagery = {},
 	appleBootstrap = null,
-	refreshAppleBootstrap = () => fetchAppleBootstrap().then(b => appleBootstrap = b).then(() => setTimeout(refreshAppleBootstrap, appleBootstrap.expiresAt - Date.now() || 7**5 )),
+	refreshAppleBootstrap = () => fetchAppleBootstrap().then(b => appleBootstrap = b).then(() => setTimeout(refreshAppleBootstrap, appleBootstrap.accessKey.split('_')[0] * 1000 - Date.now() || 7**5 )),
 	pairify = arr => arr.reduce((a, c, i, r) => i % 2 ? a.push([r[i - 1], c]) && a : a, []);
 map.attributionControl._update = function() {
 	let layerPromises = [],
