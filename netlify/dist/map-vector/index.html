@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Maps</title>
+		<link rel="stylesheet" href="//unpkg.com/maplibre-gl/dist/maplibre-gl.css"/>
+		<style>
+			html,body,#map{
+				height:100%;
+				margin:0}
+			#controls{padding:1ch}
+			label{
+				display:flex;
+				align-items:start}
+			hr{margin:.5ch}
+		</style>
+	</head>
+	<body>
+		<form id="controls" class="maplibregl-ctrl maplibregl-ctrl-group">
+			<section id="imagery"></section>
+			<hr/>
+			<section id="overlays"></section>
+		</form>
+		<div id="map"></div>
+		<script src="//unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+		<script src="map.js"></script>
+	</body>
+</html>
