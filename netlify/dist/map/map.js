@@ -15,13 +15,13 @@ function init() {
 		pane: "overlayPane"
 	});
 	defop.Apple = {
-		defattr: tileSource => [`<a href="${appleBootstrap.attributions[appleBootstrap.tiles[tileSource].attributionId][0]}">Apple</a>`],
+		defattr: tileSource => [`<a href="${appleBootstrap.attributions.find(a=>a.attributionId===appleBootstrap.tileSources.find(s=>s.tileSource===tileSource).attributionId).global[0]}">Apple</a>`],
 		fetchAttribution: () => maps.Apple.options.defaultAttribution,
-		key: data => encodeURIComponent(appleBootstrap.accessKey),
+		accessKey: data => encodeURIComponent(appleBootstrap.accessKey),
 		maxZoom: 22,
 		subdomains: ["", 1, 2, 3, 4],
-		tmpURL: (cdn, path, style) => `//${cdn}cdn{s}.apple-mapkit.com/${path}tile?x={x}&y={y}&z={z}&v={v}&accessKey={key}&style=${style}`,
-		v: data => appleBootstrap.tiles[data.tileSource].v
+		tmpURL: (cdn, path, style) => `//${cdn}cdn{s}.apple-mapkit.com/${path}tile?x={x}&y={y}&z={z}&v={v}&accessKey={accessKey}&style=${style}`,
+		v: data => appleBootstrap.tileSources.find(s=>s.tileSource===data.tileSource).path.match(/v=(\d+)/)[1]
 	}
 	imagery.Apple = L.tileLayer(defop.Apple.tmpURL("sat-", "", "7"), {
 		...defop.Apple,
@@ -161,14 +161,6 @@ async function fetchBingAttribution(e) {
 	arr.unshift("Microsoft");
 	return arr;
 }
-async function fetchAppleBootstrap() {
-	let url = 'https://corsproxy.io/?' + encodeURIComponent('https://requestinspector.com/inspector/01jh6bwgngga6hbk6zxhfbhhsj00-ead9772ee65e95c05172') + '?',
-		headers = { accept: "text/html,application/xhtml+xml,application/xml" },
-		txt = await fetch(url, { headers }).then(r => r.text()),
-		matches = [...txt.matchAll(/body[^.]*:"([^*]+accessKey[^*]+?)",[^\\]/g)],
-		straps = matches.map(l => JSON.parse(l[1].replaceAll('\\', '')));
-	return straps.reduce((p, c) => p.accessKey.split('_')[0] > c.accessKey.split('_')[0] ? p : c);
-}
 let map = L.map("map", {
 		center: [48.2, 16.4],
 		zoom: 13
@@ -177,7 +169,7 @@ let map = L.map("map", {
 	maps = {},
 	imagery = {},
 	appleBootstrap = null,
-	refreshAppleBootstrap = () => fetchAppleBootstrap().then(b => appleBootstrap = b).then(() => setTimeout(refreshAppleBootstrap, appleBootstrap.accessKey.split('_')[0] * 1000 - Date.now() || 7**5 )),
+	refreshAppleBootstrap = () => fetch("/bootstrap").then(r => r.json()).then(b => appleBootstrap = b).then(() => setTimeout(refreshAppleBootstrap, appleBootstrap.accessKey.split('_')[0] * 1000 - Date.now() || 7**5 )),
 	pairify = arr => arr.reduce((a, c, i, r) => i % 2 ? a.push([r[i - 1], c]) && a : a, []);
 map.attributionControl._update = function() {
 	let layerPromises = [],

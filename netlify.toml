@@ -7,6 +7,3 @@ Access-Control-Allow-Origin = "*"
 force = true
 from = "/**/*.ts"
 to = "/:splat.js"
-
-[functions."apple-token"]
-schedule = "*/20 * * * *"

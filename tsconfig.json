@@ -10,7 +10,8 @@
 	],
 	"exclude": [
 		"node_modules",
-		"netlify/edge-functions/ytthumb/ytthumb.ts"
+		"netlify/edge-functions/ytthumb/ytthumb.ts",
+		"netlify/functions/bootstrap/bootstrap.ts"
 	],
 	"moduleResolution": "node16"
 }

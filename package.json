@@ -9,6 +9,6 @@
 		"typescript": "^5.0.2"
 	},
 	"dependencies": {
-		"@netlify/functions": "^1.4.0"
+		"@netlify/functions": "^1.6.0"
 	}
 }
