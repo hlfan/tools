@@ -1,11 +1,14 @@
 (async function () {
     const apple = await appleUtils();
+    const google = googleUtils();
     window.imagery = {
         apple: await getAppleSatelliteLayer(apple),
-        esri: await getEsriImageryLayer()
+        esri: await getEsriImageryLayer(),
+        google: await getGoogleSatelliteLayer(google)
     };
     window.overlays = {
         apple: await getAppleHybridLayer(apple),
+        google: await getGoogleHybridLayer(google),
         osm: await getOSMLayer()
     };
     window.map = new maplibregl.Map({
@@ -193,6 +196,62 @@ async function getEsriImageryLayer() {
             target.getSource("esri-imagery").attribution = source.attribution;
             target._controls.forEach(c => c._updateAttributions && c._updateAttributions())
         }
+    };
+}
+
+function googleUtils() {
+    const tlds = ["ad", "ae", "com.ag", "com.ai", "co.ao", "it.ao", "com.ar", "as", "at", "com.au", "ba", "com.bd", "be", "bf", "bg", "com.bh", "bi", "bj", "com.bn", "com.bo", "com.br", "bs", "bt", "co.bw", "by", "com.bz", "ca", "cat", "cd", "cf", "cg", "ch", "ci", "co.ck", "cl", "cm", "com.co", "com", "co.cr", "com.cu", "cv", "cz", "de", "dj", "dk", "dm", "com.do", "dz", "com.ec", "ee", "com.eg", "es", "com.et", "fi", "com.fj", "fm", "fr", "ga", "ge", "gg", "com.gh", "gl", "gm", "gp", "gr", "com.gr", "com.gt", "gy", "hk", "com.hk", "hn", "hr", "ht", "hu", "co.hu", "co.id", "ie", "co.il", "im", "co.in", "iq", "is", "it", "je", "com.jm", "jo", "jp", "co.jp", "ne.jp", "co.ke", "kg", "com.kh", "ki", "co.kr", "com.kw", "kz", "la", "com.lb", "li", "lk", "co.ls", "lt", "lv", "com.ly", "mg", "mk", "ml", "com.mm", "mn", "ms", "com.mt", "mu", "mv", "mw", "com.mx", "co.mz", "com.na", "ng", "com.ng", "com.ni", "nl", "no", "com.np", "nu", "co.nz", "com.om", "com.pa", "com.pe", "com.pg", "com.ph", "pl", "com.pl", "pn", "com.pr", "pt", "com.py", "com.qa", "ro", "rs", "ru", "com.ru", "rw", "com.sa", "com.sb", "sc", "se", "com.sg", "sh", "si", "sk", "com.sl", "sm", "sn", "so", "st", "com.sv", "td", "tg", "co.th", "tk", "tl", "tn", "to", "com.tr", "tt", "com.tw", "co.tz", "co.uk", "co.ve", "vg", "co.vi", "vu", "ws", "co.za", "co.zm", "co.zw"];
+    const subdomains = ["", "www.", "maps."];
+    return {
+        makeTiles: path => tlds.flatMap(t => subdomains.map(s => `https://${s}google.${t}/maps/vt?pb=${path}`))
+    }
+}
+
+async function getGoogleHybridLayer(google) {
+    return {
+        name: "Google Hybrid",
+        sources: {
+            "google-hybrid": {
+                "type": "raster",
+                "tiles": google.makeTiles("!1m4!1m3!1i{z}!2i{x}!3i{y}!2m1!1e0!3m5!12m4!1e4!2m2!1sset!2sRoadmapSatellite"),
+                "maxzoom": 22,
+                "tileSize": 256,
+                "attribution": "Google"
+                // TODO: update attribution
+            }
+        },
+        layers: [
+            {
+                id: "google-hybrid",
+                type: "raster",
+                source: "google-hybrid",
+                maxzoom: 22
+            }
+        ]
+    };
+}
+
+async function getGoogleSatelliteLayer(google) {
+    return {
+        name: "Google Satellite",
+        sources: {
+            "google-satellite": {
+                "type": "raster",
+                "tiles": google.makeTiles("!1m4!1m3!1i{z}!2i{x}!3i{y}!2m1!1e1"),
+                "maxzoom": 22,
+                "tileSize": 256,
+                "attribution": "Google"
+                // TODO: update attribution
+            }
+        },
+        layers: [
+            {
+                id: "google-satellite",
+                type: "raster",
+                source: "google-satellite",
+                maxzoom: 22
+            }
+        ]
     };
 }
 
