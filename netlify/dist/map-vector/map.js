@@ -202,8 +202,22 @@ async function getEsriImageryLayer() {
 function googleUtils() {
     const tlds = ["ad", "ae", "com.ag", "com.ai", "co.ao", "it.ao", "com.ar", "as", "at", "com.au", "ba", "com.bd", "be", "bf", "bg", "com.bh", "bi", "bj", "com.bn", "com.bo", "com.br", "bs", "bt", "co.bw", "by", "com.bz", "ca", "cat", "cd", "cf", "cg", "ch", "ci", "co.ck", "cl", "cm", "com.co", "com", "co.cr", "com.cu", "cv", "cz", "de", "dj", "dk", "dm", "com.do", "dz", "com.ec", "ee", "com.eg", "es", "com.et", "fi", "com.fj", "fm", "fr", "ga", "ge", "gg", "com.gh", "gl", "gm", "gp", "gr", "com.gr", "com.gt", "gy", "hk", "com.hk", "hn", "hr", "ht", "hu", "co.hu", "co.id", "ie", "co.il", "im", "co.in", "iq", "is", "it", "je", "com.jm", "jo", "jp", "co.jp", "ne.jp", "co.ke", "kg", "com.kh", "ki", "co.kr", "com.kw", "kz", "la", "com.lb", "li", "lk", "co.ls", "lt", "lv", "com.ly", "mg", "mk", "ml", "com.mm", "mn", "ms", "com.mt", "mu", "mv", "mw", "com.mx", "co.mz", "com.na", "ng", "com.ng", "com.ni", "nl", "no", "com.np", "nu", "co.nz", "com.om", "com.pa", "com.pe", "com.pg", "com.ph", "pl", "com.pl", "pn", "com.pr", "pt", "com.py", "com.qa", "ro", "rs", "ru", "com.ru", "rw", "com.sa", "com.sb", "sc", "se", "com.sg", "sh", "si", "sk", "com.sl", "sm", "sn", "so", "st", "com.sv", "td", "tg", "co.th", "tk", "tl", "tn", "to", "com.tr", "tt", "com.tw", "co.tz", "co.uk", "co.ve", "vg", "co.vi", "vu", "ws", "co.za", "co.zm", "co.zw"];
     const subdomains = ["", "www.", "maps."];
+    const domains = tlds.flatMap(t => subdomains.map(s => `https://${s}google.${t}/maps/vt?pb=`));
     return {
-        makeTiles: path => tlds.flatMap(t => subdomains.map(s => `https://${s}google.${t}/maps/vt?pb=${path}`))
+        makeTiles: path => domains.map(d => d + path),
+        getAttribution: async function (layerId) {
+            const bbox = map.getBounds(),
+                encoded = [["South", "West"], ["North", "East"]]
+                    .map((m, i) => `!${i + 5}m2${Array.from(
+                        new Uint32Array(new Int32Array(m.map(d => bbox["get" + d]() * 1e7)).buffer),
+                        (l, i) => `!${i + 1}x${l}`
+                    ).join('')}`)
+                    .join(''),
+                randomDomain = domains[Math.floor(Math.random() * domains.length)],
+                url = `${randomDomain}!1m8!4m7!2u${Math.floor(map.getZoom())}${encoded}!2m1!1e${layerId}!4e5`,
+                arr = await fetch(url).then(r => r.json());
+            return [...new Set(["Google", ...arr.flat()])].sort().join(", ")
+        }
     }
 }
 
@@ -217,7 +231,6 @@ async function getGoogleHybridLayer(google) {
                 "maxzoom": 22,
                 "tileSize": 256,
                 "attribution": "Google"
-                // TODO: update attribution
             }
         },
         layers: [
@@ -227,7 +240,11 @@ async function getGoogleHybridLayer(google) {
                 source: "google-hybrid",
                 maxzoom: 22
             }
-        ]
+        ],
+        onMoveEnd: async function ({ target }) {
+            target.getSource("google-hybrid").attribution = await google.getAttribution(0);
+            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+        }
     };
 }
 
@@ -241,7 +258,6 @@ async function getGoogleSatelliteLayer(google) {
                 "maxzoom": 22,
                 "tileSize": 256,
                 "attribution": "Google"
-                // TODO: update attribution
             }
         },
         layers: [
@@ -251,7 +267,11 @@ async function getGoogleSatelliteLayer(google) {
                 source: "google-satellite",
                 maxzoom: 22
             }
-        ]
+        ],
+        onMoveEnd: async function ({ target }) {
+            target.getSource("google-satellite").attribution = await google.getAttribution(1);
+            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+        }
     };
 }
 

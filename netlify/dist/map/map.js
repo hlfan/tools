@@ -145,8 +145,13 @@ function init() {
 	new L.Control.Layers(imagery, maps).addTo(map);
 }
 async function fetchGoogleAttribution(e) {
-	let ext = dir => Math.abs(Math.floor(map.getBounds()['get' + dir]() * 1e7)),
-		url = `//www.google.com/maps/vt?pb=!1m8!4m7!2u${map.getZoom()}!5m2!1x${ext("South")}!2x${ext("West")}!6m2!1x${ext("North")}!2x${ext("East")}!2m1!1e${e}!4e5`
+	let bbox = [["South", "West"], ["North", "East"]].map((m, i) => 
+		`!${i + 5}m2${Array.from(
+			new Uint32Array(new Int32Array(m.map(d => map.getBounds()["get" + d]() * 1e7)).buffer),
+			(l, i) => `!${i + 1}x${l}`
+		).join('')}`
+	).join(''),
+		url = `//www.google.com/maps/vt?pb=!1m8!4m7!2u${map.getZoom()}${bbox}!2m1!1e${e}!4e5`
 	arr = await fetch(url).then((r) => r.json());
 	arr = arr[0] || [];
 	arr.unshift("Google");
