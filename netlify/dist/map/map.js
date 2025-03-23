@@ -161,10 +161,8 @@ async function fetchBingAttribution(e) {
 	arr.unshift("Microsoft");
 	return arr;
 }
-let map = L.map("map", {
-		center: [48.2, 16.4],
-		zoom: 13
-	}),
+let map = L.map("map").fitWorld(),
+	hash = new L.Hash(map)
 	defop = {},
 	maps = {},
 	imagery = {},
