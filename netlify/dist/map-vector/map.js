@@ -1,9 +1,11 @@
 (async function () {
+    const apple = await appleUtils();
     window.imagery = {
-        esri: await getEsriImageryLayer(),
-        apple: await getAppleLayer()
+        apple: await getAppleSatelliteLayer(apple),
+        esri: await getEsriImageryLayer()
     };
     window.overlays = {
+        apple: await getAppleHybridLayer(apple),
         osm: await getOSMLayer()
     };
     window.map = new maplibregl.Map({
@@ -54,7 +56,7 @@ function buildList(id, layers, type) {
             layer.layers.forEach(layer => map.addLayer(layer,
                 id === "imagery" ? map.getLayersOrder()[0] : undefined
             ));
-            if (layer.onViewChange) map.on("moveend", layer.onViewChange);
+            if (layer.onMoveEnd) map.on("moveend", layer.onMoveEnd);
             input.dataset.checked = true;
         }
         for (const input of newlyUnchecked) {
@@ -62,25 +64,97 @@ function buildList(id, layers, type) {
             layer.layers.forEach(layer => map.removeLayer(layer.id));
             Object.keys(layer.sources).forEach(source => map.removeSource(source));
             layer.sprite?.forEach(sprite => map.removeSprite(sprite.id));
-            if (layer.onViewChange) map.off("moveend", layer.onViewChange);
+            if (layer.onMoveEnd) map.off("moveend", layer.onMoveEnd);
             input.dataset.checked = false
         }
     });
 }
 
-async function getOSMLayer() {
-    const style = await fetch("versatilescolorfulhybrid.json").then(r => r.json());
+async function appleUtils() {
+    const fetchBootstrap = async () => fetch("/bootstrap").then(r => r.json());
     return {
-        name: "OpenStreetMap",
+        bootstrap: await fetchBootstrap(),
+        hasValidBootstrap: function () {
+            return this.bootstrap?.accessKey?.split('_')[0] * 1000 > Date.now();
+        },
+        fetchBootstrap: fetchBootstrap,
+        getAttribution: function (source) {
+            return this.bootstrap.attributions.find(a => a.attributionId == this.bootstrap.tileSources.find(s => s.tileSource === source).attributionId).global.map(a => `<a href="${a.url}">${a.name + (a.name.length < 2 ? "Apple" : "")}</a>`).join(", ");
+        },
+        getTiles: function (source, discardParams) {
+            let path = this.bootstrap.tileSources.find(s => s.tileSource === source).path.replaceAll(/(\{|\})+/g, "$1");
+            for (const [param, value] of discardParams) path = path.replace(param, value || "");
+            const subdomains = this.bootstrap.tileSources.find(s => s.tileSource === source).domains.flatMap(d => ["", 1, 2, 3, 4].flatMap(s => d.replace(".", s + ".")));
+            return subdomains.map(d => `https://${d}${path}`);
+        }
+    };
+}
+
+async function getAppleHybridLayer(apple) {
+    const makeTiles = () => apple.getTiles("hybrid-overlay", [["{tileSizeIndex}", 1], ["{resolution}", 1], ["&lang={lang}"]]);
+    return {
+        name: "Apple Hybrid",
         sources: {
-            osmv: {
-                type: "vector",
-                url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
+            "apple-hybrid": {
+                "type": "raster",
+                "tiles": makeTiles(),
+                "maxzoom": 21,
+                "tileSize": 256,
+                "attribution": apple.getAttribution("hybrid-overlay")
             }
         },
-        style: style,
-        layers: style.layers,
-        sprite: style.sprite
+        layers: [
+            {
+                id: "apple-hybrid",
+                type: "raster",
+                source: "apple-hybrid",
+                maxzoom: 21
+            }
+        ],
+        onMoveEnd: function ({ target }) {
+            if (apple.hasValidBootstrap()) return;
+            apple.fetchBootstrap().then(bootstrap => {
+                apple.bootstrap = bootstrap;
+                const source = target.getSource("apple-hybrid");
+                source.tiles = makeTiles();
+                source.attribution = apple.getAttribution("hybrid-overlay");
+                target._controls.forEach(c => c._updateAttributions && c._updateAttributions())
+            });
+        }
+    };
+}
+
+async function getAppleSatelliteLayer(apple) {
+    const makeTiles = () => apple.getTiles("satellite", [["&size={tileSizeIndex}"], ["&scale={resolution}"]]);
+    return {
+        name: "Apple Satellite",
+        sources: {
+            "apple-satellite": {
+                "type": "raster",
+                "tiles": makeTiles(),
+                "maxzoom": 22,
+                "tileSize": 256,
+                "attribution": apple.getAttribution("satellite")
+            }
+        },
+        layers: [
+            {
+                id: "apple-satellite",
+                type: "raster",
+                source: "apple-satellite",
+                maxzoom: 22
+            }
+        ],
+        onMoveEnd: function ({ target }) {
+            if (apple.hasValidBootstrap()) return;
+            apple.fetchBootstrap().then(bootstrap => {
+                apple.bootstrap = bootstrap;
+                const source = target.getSource("apple-satellite");
+                source.tiles = makeTiles();
+                source.attribution = apple.getAttribution("satellite");
+                target._controls.forEach(c => c._updateAttributions && c._updateAttributions())
+            });
+        }
     };
 }
 
@@ -106,7 +180,7 @@ async function getEsriImageryLayer() {
             }
         ],
         contributors: await fetch("https://static.arcgis.com/attribution/World_Imagery").then(r => r.json()).then(r => r.contributors),
-        onViewChange: function ({ target }) {
+        onMoveEnd: function ({ target }) {
             const source = imagery.esri.sources["esri-imagery"];
             source.attribution = imagery.esri.contributors.filter(c =>
                 c.coverageAreas.some(a => target.getZoom() >= a.zoomMin && target.getZoom() <= a.zoomMax && (
@@ -122,32 +196,18 @@ async function getEsriImageryLayer() {
     };
 }
 
-async function getAppleLayer() {
-    const bootstrap = await fetch("/bootstrap").then(r => r.json());
-    function getTiles(s) {
-        const path = bootstrap.tileSources.find(s => s.tileSource === "satellite").path.replaceAll(/(\{|\})+/g, "$1").replace("&size={tileSizeIndex}&scale={resolution}", "");
-        return `https://sat-cdn${s}.apple-mapkit.com${path}`;
-    }
+async function getOSMLayer() {
+    const style = await fetch("versatilescolorfulhybrid.json").then(r => r.json());
     return {
-        name: "Apple Satellite",
-        bootstrap: bootstrap,
+        name: "OpenStreetMap",
         sources: {
-            "apple-satellite": {
-                "type": "raster",
-                "tiles": ["", 1, 2, 3, 4].map(getTiles),
-                "maxzoom": 22,
-                "tileSize": 256,
-                "attribution": bootstrap.attributions.find(a => a.attributionId == bootstrap.tileSources.find(s => s.tileSource === "satellite").attributionId).global.map(a => `<a href="${a.url}">${a.name !== String.fromCharCode(8206) ? a.name : "Apple"}</a>`).join(", ")
+            osmv: {
+                type: "vector",
+                url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
             }
         },
-        layers: [
-            {
-                id: "apple-satellite",
-                type: "raster",
-                source: "apple-satellite",
-                minzoom: 0,
-                maxzoom: 21
-            }
-        ]
+        style: style,
+        layers: style.layers,
+        sprite: style.sprite
     };
 }
