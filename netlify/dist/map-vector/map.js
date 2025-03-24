@@ -3,14 +3,15 @@
     const apple = await appleUtils();
     const google = googleUtils();
     window.imagery = {
-        apple: await getAppleSatelliteLayer(apple),
+        apple: getAppleSatelliteLayer(apple),
+        bing: getBingImageryLayer(),
         esri: await getEsriImageryLayer(arcgis),
-        google: await getGoogleSatelliteLayer(google)
+        google: getGoogleSatelliteLayer(google)
     };
     window.overlays = {
-        apple: await getAppleHybridLayer(apple),
+        apple: getAppleHybridLayer(apple),
         esri: await getEsriHybridLayer(arcgis),
-        google: await getGoogleHybridLayer(google),
+        google: getGoogleHybridLayer(google),
         osm: await getOSMLayer()
     };
     window.map = new maplibregl.Map({
@@ -181,6 +182,30 @@ function getAppleSatelliteLayer (apple) {
                 target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
             });
         }
+    };
+}
+
+function getBingImageryLayer () {
+    return {
+        name: "Bing Aerial",
+        sources: {
+            "bing-aerial": {
+                type: "raster",
+                tiles: [0, 1, 2, 3, 4, 5, 6, 7].map(s => `https://ecn.t${s}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=0`),
+                maxzoom: 22,
+                tileSize: 256,
+                attribution: "Microsoft"
+            }
+        },
+        layers: [
+            {
+                id: "bing-aerial",
+                type: "raster",
+                source: "bing-aerial",
+                maxzoom: 22
+            }
+        ]
+        // TODO: update attribution
     };
 }
 
