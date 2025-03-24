@@ -1,3 +1,3 @@
 # map glyph switcher
-/mapglyphs/noto_sans_bold/*     https://tiles.versatiles.org/assets/glyphs/noto_sans_bold/:splat
-/mapglyphs/noto_sans_regular/*  https://tiles.versatiles.org/assets/glyphs/noto_sans_regular/:splat
+/mapglyphs/noto*    https://tiles.versatiles.org/assets/glyphs/noto:splat
+/mapglyphs/Arial*   https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/fonts/Arial:splat

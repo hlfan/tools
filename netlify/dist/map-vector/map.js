@@ -1,13 +1,15 @@
 (async function () {
+    const arcgis = arcgisUtils();
     const apple = await appleUtils();
     const google = googleUtils();
     window.imagery = {
         apple: await getAppleSatelliteLayer(apple),
-        esri: await getEsriImageryLayer(),
+        esri: await getEsriImageryLayer(arcgis),
         google: await getGoogleSatelliteLayer(google)
     };
     window.overlays = {
         apple: await getAppleHybridLayer(apple),
+        esri: await getEsriHybridLayer(arcgis),
         google: await getGoogleHybridLayer(google),
         osm: await getOSMLayer()
     };
@@ -30,16 +32,16 @@
     map.once("load", () =>
         map._controlContainer.querySelector(".maplibregl-ctrl-top-left")?.appendChild(document.querySelector("#controls"))
     );
-})();
+}());
 
-function buildList(id, layers, type) {
+function buildList (id, layers, type) {
     const container = document.getElementById(id);
     Object.entries(layers)
         .sort(([, a], [, b]) => a.name.localeCompare(b.name))
         .forEach(([id, layer]) => {
             const label = document.createElement("label");
             const input = document.createElement("input");
-            input.id = container.id + "-" + id;
+            input.id = `${container.id}-${id}`;
             label.htmlFor = input.id;
             input.type = type;
             input.name = container.id;
@@ -49,7 +51,7 @@ function buildList(id, layers, type) {
             label.appendChild(document.createTextNode(layer.name));
             container.appendChild(label);
         });
-    container.addEventListener("change", function (e) {
+    container.addEventListener("change", () => {
         const newlyChecked = container.querySelectorAll("input:checked[data-checked='false']");
         const newlyUnchecked = container.querySelectorAll("input:not(:checked)[data-checked='true']");
         for (const input of newlyChecked) {
@@ -68,42 +70,63 @@ function buildList(id, layers, type) {
             Object.keys(layer.sources).forEach(source => map.removeSource(source));
             layer.sprite?.forEach(sprite => map.removeSprite(sprite.id));
             if (layer.onMoveEnd) map.off("moveend", layer.onMoveEnd);
-            input.dataset.checked = false
+            input.dataset.checked = false;
         }
     });
 }
 
-async function appleUtils() {
-    const fetchBootstrap = async () => fetch("/bootstrap").then(r => r.json());
+function arcgisUtils () {
+    return {
+        getAttribution (map, contributors) {
+            return contributors
+                .filter(c => c.coverageAreas.some(a => map.getZoom() >= a.zoomMin && map.getZoom() <= a.zoomMax && (
+                    map.getBounds().getNorth() >= a.bbox[0] &&
+                    map.getBounds().getEast() >= a.bbox[1] &&
+                    map.getBounds().getSouth() <= a.bbox[2] &&
+                    map.getBounds().getWest() <= a.bbox[3]
+                )))
+                .map(c => c.attribution)
+                .join(", ");
+        },
+        getContributors (service) {
+            return fetch(`https://static.arcgis.com/attribution/${service}`)
+                .then(r => r.json())
+                .then(r => r.contributors);
+        }
+    };
+}
+
+async function appleUtils () {
+    const fetchBootstrap = () => fetch("/bootstrap").then(r => r.json());
     return {
         bootstrap: await fetchBootstrap(),
-        hasValidBootstrap: function () {
-            return this.bootstrap?.accessKey?.split('_')[0] * 1000 > Date.now();
+        hasValidBootstrap () {
+            return this.bootstrap?.accessKey?.split("_")[0] * 1000 > Date.now();
         },
-        fetchBootstrap: fetchBootstrap,
-        getAttribution: function (source) {
-            return this.bootstrap.attributions.find(a => a.attributionId == this.bootstrap.tileSources.find(s => s.tileSource === source).attributionId).global.map(a => `<a href="${a.url}">${a.name + (a.name.length < 2 ? "Apple" : "")}</a>`).join(", ");
+        fetchBootstrap,
+        getAttribution (source) {
+            return this.bootstrap.attributions.find(a => a.attributionId === this.bootstrap.tileSources.find(s => s.tileSource === source).attributionId).global.map(a => `<a href="${a.url}">${a.name + (a.name.length < 2 ? "Apple" : "")}</a>`).join(", ");
         },
-        getTiles: function (source, discardParams) {
+        getTiles (source, discardParams) {
             let path = this.bootstrap.tileSources.find(s => s.tileSource === source).path.replaceAll(/(\{|\})+/g, "$1");
             for (const [param, value] of discardParams) path = path.replace(param, value || "");
-            const subdomains = this.bootstrap.tileSources.find(s => s.tileSource === source).domains.flatMap(d => ["", 1, 2, 3, 4].flatMap(s => d.replace(".", s + ".")));
+            const subdomains = this.bootstrap.tileSources.find(s => s.tileSource === source).domains.flatMap(d => ["", 1, 2, 3, 4].flatMap(s => d.replace(".", `${s}.`)));
             return subdomains.map(d => `https://${d}${path}`);
         }
     };
 }
 
-async function getAppleHybridLayer(apple) {
+function getAppleHybridLayer (apple) {
     const makeTiles = () => apple.getTiles("hybrid-overlay", [["{tileSizeIndex}", 1], ["{resolution}", 1], ["&lang={lang}"]]);
     return {
         name: "Apple Hybrid",
         sources: {
             "apple-hybrid": {
-                "type": "raster",
-                "tiles": makeTiles(),
-                "maxzoom": 21,
-                "tileSize": 256,
-                "attribution": apple.getAttribution("hybrid-overlay")
+                type: "raster",
+                tiles: makeTiles(),
+                maxzoom: 21,
+                tileSize: 256,
+                attribution: apple.getAttribution("hybrid-overlay")
             }
         },
         layers: [
@@ -114,30 +137,30 @@ async function getAppleHybridLayer(apple) {
                 maxzoom: 21
             }
         ],
-        onMoveEnd: function ({ target }) {
+        onMoveEnd ({target}) {
             if (apple.hasValidBootstrap()) return;
             apple.fetchBootstrap().then(bootstrap => {
                 apple.bootstrap = bootstrap;
                 const source = target.getSource("apple-hybrid");
                 source.tiles = makeTiles();
                 source.attribution = apple.getAttribution("hybrid-overlay");
-                target._controls.forEach(c => c._updateAttributions && c._updateAttributions())
+                target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
             });
         }
     };
 }
 
-async function getAppleSatelliteLayer(apple) {
+function getAppleSatelliteLayer (apple) {
     const makeTiles = () => apple.getTiles("satellite", [["&size={tileSizeIndex}"], ["&scale={resolution}"]]);
     return {
         name: "Apple Satellite",
         sources: {
             "apple-satellite": {
-                "type": "raster",
-                "tiles": makeTiles(),
-                "maxzoom": 22,
-                "tileSize": 256,
-                "attribution": apple.getAttribution("satellite")
+                type: "raster",
+                tiles: makeTiles(),
+                maxzoom: 22,
+                tileSize: 256,
+                attribution: apple.getAttribution("satellite")
             }
         },
         layers: [
@@ -148,20 +171,53 @@ async function getAppleSatelliteLayer(apple) {
                 maxzoom: 22
             }
         ],
-        onMoveEnd: function ({ target }) {
+        onMoveEnd ({target}) {
             if (apple.hasValidBootstrap()) return;
             apple.fetchBootstrap().then(bootstrap => {
                 apple.bootstrap = bootstrap;
                 const source = target.getSource("apple-satellite");
                 source.tiles = makeTiles();
                 source.attribution = apple.getAttribution("satellite");
-                target._controls.forEach(c => c._updateAttributions && c._updateAttributions())
+                target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
             });
         }
     };
 }
 
-async function getEsriImageryLayer() {
+async function getEsriHybridLayer (arcgis) {
+    const contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
+    const text = await fetch("https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/styles/root.json").then(r => r.text());
+    const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?["}],/g, match => match.replaceAll(/"([A-Z][^"]+)"/g, '"world-basemap:$1"')));
+    return {
+        name: "Esri Hybrid",
+        sources: {
+            esri: {
+                type: "vector",
+                tiles: ["https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/{z}/{y}/{x}.pbf"],
+                minzoom: 0,
+                maxzoom: 22,
+                scheme: "xyz",
+                attribution: "Esri, TomTom, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community"
+            }
+        },
+        sprite: [
+            {
+                id: "world-basemap",
+                url: "https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/sprites/sprite"
+            }
+        ],
+        style,
+        layers: style.layers,
+        contributors,
+        onMoveEnd ({target}) {
+            target.getSource("esri").attribution = arcgis.getAttribution(map, contributors);
+            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+        }
+    };
+}
+
+async function getEsriImageryLayer (arcgis) {
+    const contributors = await arcgis.getContributors("World_Imagery");
     return {
         name: "Esri World Imagery",
         sources: {
@@ -182,55 +238,46 @@ async function getEsriImageryLayer() {
                 maxzoom: 23
             }
         ],
-        contributors: await fetch("https://static.arcgis.com/attribution/World_Imagery").then(r => r.json()).then(r => r.contributors),
-        onMoveEnd: function ({ target }) {
-            const source = imagery.esri.sources["esri-imagery"];
-            source.attribution = imagery.esri.contributors.filter(c =>
-                c.coverageAreas.some(a => target.getZoom() >= a.zoomMin && target.getZoom() <= a.zoomMax && (
-                    target.getBounds().getNorth() >= a.bbox[0] &&
-                    target.getBounds().getEast() >= a.bbox[1] &&
-                    target.getBounds().getSouth() <= a.bbox[2] &&
-                    target.getBounds().getWest() <= a.bbox[3]
-                ))
-            ).map(c => c.attribution).join(", ");
-            target.getSource("esri-imagery").attribution = source.attribution;
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions())
+        contributors,
+        onMoveEnd ({target}) {
+            target.getSource("esri-imagery").attribution = arcgis.getAttribution(map, contributors);
+            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
         }
     };
 }
 
-function googleUtils() {
+function googleUtils () {
     const tlds = ["ad", "ae", "com.ag", "com.ai", "co.ao", "it.ao", "com.ar", "as", "at", "com.au", "ba", "com.bd", "be", "bf", "bg", "com.bh", "bi", "bj", "com.bn", "com.bo", "com.br", "bs", "bt", "co.bw", "by", "com.bz", "ca", "cat", "cd", "cf", "cg", "ch", "ci", "co.ck", "cl", "cm", "com.co", "com", "co.cr", "com.cu", "cv", "cz", "de", "dj", "dk", "dm", "com.do", "dz", "com.ec", "ee", "com.eg", "es", "com.et", "fi", "com.fj", "fm", "fr", "ga", "ge", "gg", "com.gh", "gl", "gm", "gp", "gr", "com.gr", "com.gt", "gy", "hk", "com.hk", "hn", "hr", "ht", "hu", "co.hu", "co.id", "ie", "co.il", "im", "co.in", "iq", "is", "it", "je", "com.jm", "jo", "jp", "co.jp", "ne.jp", "co.ke", "kg", "com.kh", "ki", "co.kr", "com.kw", "kz", "la", "com.lb", "li", "lk", "co.ls", "lt", "lv", "com.ly", "mg", "mk", "ml", "com.mm", "mn", "ms", "com.mt", "mu", "mv", "mw", "com.mx", "co.mz", "com.na", "ng", "com.ng", "com.ni", "nl", "no", "com.np", "nu", "co.nz", "com.om", "com.pa", "com.pe", "com.pg", "com.ph", "pl", "com.pl", "pn", "com.pr", "pt", "com.py", "com.qa", "ro", "rs", "ru", "com.ru", "rw", "com.sa", "com.sb", "sc", "se", "com.sg", "sh", "si", "sk", "com.sl", "sm", "sn", "so", "st", "com.sv", "td", "tg", "co.th", "tk", "tl", "tn", "to", "com.tr", "tt", "com.tw", "co.tz", "co.uk", "co.ve", "vg", "co.vi", "vu", "ws", "co.za", "co.zm", "co.zw"];
     const subdomains = ["", "www.", "maps."];
     const domains = tlds.flatMap(t => subdomains.map(s => `https://${s}google.${t}/maps/vt?pb=`));
     return {
         makeTiles: path => domains.map(d => d + path),
-        getAttribution: async function (layerId) {
+        async getAttribution (layerId) {
             const bbox = map.getBounds(),
                 encoded = [["South", "West"], ["North", "East"]]
                     .map((m, i) => `!${i + 5}m2${Array.from(
-                        new Uint32Array(new Int32Array(m.map(d => bbox["get" + d]() * 1e7)).buffer),
+                        new Uint32Array(new Int32Array(m.map(d => bbox[`get${d}`]() * 1e7)).buffer),
                         (l, i) => `!${i + 1}x${l}`
-                    ).join('')}`)
-                    .join(''),
+                    ).join("")}`)
+                    .join(""),
                 randomDomain = domains[Math.floor(Math.random() * domains.length)],
                 url = `${randomDomain}!1m8!4m7!2u${Math.floor(map.getZoom())}${encoded}!2m1!1e${layerId}!4e5`,
                 arr = await fetch(url).then(r => r.json());
-            return [...new Set(["Google", ...arr.flat()])].sort().join(", ")
+            return [...new Set(["Google", ...arr.flat()])].sort().join(", ");
         }
-    }
+    };
 }
 
-async function getGoogleHybridLayer(google) {
+function getGoogleHybridLayer (google) {
     return {
         name: "Google Hybrid",
         sources: {
             "google-hybrid": {
-                "type": "raster",
-                "tiles": google.makeTiles("!1m4!1m3!1i{z}!2i{x}!3i{y}!2m1!1e0!3m5!12m4!1e4!2m2!1sset!2sRoadmapSatellite"),
-                "maxzoom": 22,
-                "tileSize": 256,
-                "attribution": "Google"
+                type: "raster",
+                tiles: google.makeTiles("!1m4!1m3!1i{z}!2i{x}!3i{y}!2m1!1e0!3m5!12m4!1e4!2m2!1sset!2sRoadmapSatellite"),
+                maxzoom: 22,
+                tileSize: 256,
+                attribution: "Google"
             }
         },
         layers: [
@@ -241,23 +288,23 @@ async function getGoogleHybridLayer(google) {
                 maxzoom: 22
             }
         ],
-        onMoveEnd: async function ({ target }) {
+        async onMoveEnd ({target}) {
             target.getSource("google-hybrid").attribution = await google.getAttribution(0);
             target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
         }
     };
 }
 
-async function getGoogleSatelliteLayer(google) {
+function getGoogleSatelliteLayer (google) {
     return {
         name: "Google Satellite",
         sources: {
             "google-satellite": {
-                "type": "raster",
-                "tiles": google.makeTiles("!1m4!1m3!1i{z}!2i{x}!3i{y}!2m1!1e1"),
-                "maxzoom": 22,
-                "tileSize": 256,
-                "attribution": "Google"
+                type: "raster",
+                tiles: google.makeTiles("!1m4!1m3!1i{z}!2i{x}!3i{y}!2m1!1e1"),
+                maxzoom: 22,
+                tileSize: 256,
+                attribution: "Google"
             }
         },
         layers: [
@@ -268,14 +315,14 @@ async function getGoogleSatelliteLayer(google) {
                 maxzoom: 22
             }
         ],
-        onMoveEnd: async function ({ target }) {
+        async onMoveEnd ({target}) {
             target.getSource("google-satellite").attribution = await google.getAttribution(1);
             target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
         }
     };
 }
 
-async function getOSMLayer() {
+async function getOSMLayer () {
     const style = await fetch("versatilescolorfulhybrid.json").then(r => r.json());
     return {
         name: "OpenStreetMap",
@@ -285,7 +332,7 @@ async function getOSMLayer() {
                 url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
             }
         },
-        style: style,
+        style,
         layers: style.layers,
         sprite: style.sprite
     };
