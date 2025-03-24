@@ -3,18 +3,21 @@
     const apple = await appleUtils();
     const bing = bingUtils();
     const google = googleUtils();
+    const tomtom = await tomtomUtils();
     window.imagery = {
         apple: getAppleSatelliteLayer(apple),
         bing: getBingImageryLayer(bing),
         esri: await getEsriImageryLayer(arcgis),
-        google: getGoogleSatelliteLayer(google)
+        google: getGoogleSatelliteLayer(google),
+        tomtom: getTomtomSatelliteLayer(tomtom)
     };
     window.overlays = {
         apple: getAppleHybridLayer(apple),
         bing: await getBingHybridLayer(bing),
         esri: await getEsriHybridLayer(arcgis),
         google: getGoogleHybridLayer(google),
-        osm: await getOSMLayer()
+        osm: await getOSMLayer(),
+        tomtom: getTomtomHybridLayer(tomtom)
     };
     window.map = new maplibregl.Map({
         container: "map",
@@ -261,8 +264,9 @@ function getBingImageryLayer (bing) {
 }
 
 async function getEsriHybridLayer (arcgis) {
+    const basemapURL = "https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/";
     const contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
-    const text = await fetch("https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/styles/root.json").then(r => r.text());
+    const text = await fetch(`${basemapURL}styles/root.json`).then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?["}],/g, match => match.replaceAll(/"([A-Z][^"]+)"/g, '"world-basemap:$1"')));
     return {
         name: "Esri",
@@ -278,7 +282,7 @@ async function getEsriHybridLayer (arcgis) {
         sprite: [
             {
                 id: "world-basemap",
-                url: "https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/sprites/sprite"
+                url: `${basemapURL}sprites/sprite`
             }
         ],
         style,
@@ -410,5 +414,38 @@ async function getOSMLayer () {
         style,
         layers: style.layers,
         sprite: style.sprite
+    };
+}
+
+async function tomtomUtils () {
+    const text = await fetch("//api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl").then(r => r.text());
+    const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1')));
+    for (const source of Object.values(style.sources)) source.attribution = "TomTom";
+    return style;
+}
+
+function getTomtomHybridLayer (tomtom) {
+    const {satellite, ...sources} = tomtom.sources;
+    return {
+        name: "TomTom",
+        title: "TomTom Hybrid",
+        sources,
+        sprite: [
+            {
+                id: "tomtom",
+                url: tomtom.sprite
+            }
+        ],
+        layers: tomtom.layers.filter(l => l.source?.endsWith("Tiles"))
+    };
+}
+
+function getTomtomSatelliteLayer (tomtom) {
+    const {satellite, ...labels} = tomtom.sources;
+    return {
+        name: "TomTom",
+        title: "TomTom Satellite",
+        sources: {satellite},
+        layers: [tomtom.layers.find(l => l.source === "satellite")]
     };
 }

@@ -1,7 +1,9 @@
 # map glyph switcher
-/mapglyphs/noto*    https://tiles.versatiles.org/assets/glyphs/noto:splat.pbf
 /mapglyphs/Arial*   https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/fonts/Arial:splat.pbf
-/mapglyphs/Roboto*  /mapassets/bing/Roboto:splat
+/mapglyphs/noto_*    https://tiles.versatiles.org/assets/glyphs/noto_:splat.pbf
+/mapglyphs/Noto-*    https://api.tomtom.com/style/1/glyph/24.4.1-1/Noto-:splat.pbf?key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl
+/mapglyphs/NotoSans-*    https://api.tomtom.com/style/1/glyph/24.4.1-1/NotoSans-:splat.pbf?key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl
+/mapglyphs/Roboto*  /mapassets/bing/glyphs/Roboto:splat
 
+/mapassets/bing/glyphs/:glyphs/*   https://t.ssl.ak.dynamic.tiles.virtualearth.net/comp/stl?ods=mvt&og=2638&glyphs=:glyphs&range=:splat
 /mapassets/bing/sprite*     https://t.ssl.ak.dynamic.tiles.virtualearth.net/comp/stl/sprite:splat?ods=mvt&mbxs=7783fd80-c585-4aa0-9f40-f58c34171d10&v=9.33
-/mapassets/bing/:glyphs/*   https://t.ssl.ak.dynamic.tiles.virtualearth.net/comp/stl?ods=mvt&og=2638&glyphs=:glyphs&range=:splat
