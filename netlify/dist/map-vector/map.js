@@ -9,6 +9,7 @@
         bing: getBingImageryLayer(bing),
         esri: await getEsriImageryLayer(arcgis),
         google: getGoogleSatelliteLayer(google),
+        here: getHereSatelliteLayer(),
         tomtom: getTomtomSatelliteLayer(tomtom)
     };
     window.overlays = {
@@ -16,6 +17,7 @@
         bing: await getBingHybridLayer(bing),
         esri: await getEsriHybridLayer(arcgis),
         google: getGoogleHybridLayer(google),
+        mapquest: await getMapquestHybridLayer(), // here itself has no hybrid json afaict so mapquest style instead
         osm: await getOSMLayer(),
         tomtom: getTomtomHybridLayer(tomtom)
     };
@@ -23,7 +25,7 @@
         container: "map",
         hash: true,
         maplibreLogo: false,
-        maxPitch: 90,
+        maxPitch: 70,
         maxZoom: 24,
         style: {
             version: 8,
@@ -400,6 +402,52 @@ function getGoogleSatelliteLayer (google) {
     };
 }
 
+function getHereSatelliteLayer () {
+    return {
+        name: "Here",
+        title: "Here Satellite",
+        sources: {
+            "here-sat": {
+                type: "raster",
+                tiles: ["https://maps.hereapi.com/v3/base/mc/{z}/{x}/{y}/jpeg?style=satellite.day&apiKey=aRrXMN6rNeDunujbIgCqESvkttKlk4Pp2j5N7xTp4Ek"],
+                maxzoom: 20,
+                tileSize: 256,
+                attribution: "Here, Maxar"
+            }
+        },
+        layers: [
+            {
+                id: "here-sat",
+                type: "raster",
+                source: "here-sat"
+            }
+        ]
+    };
+}
+
+async function getMapquestHybridLayer() {
+    const text = await fetch("//styles.mapq.st/styles/satellite").then(r => r.text());
+    const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?"[^"]+":/g, match => match.replaceAll(/"(marker|shield|parking|pom|junction|oneway)/g, '"mapquest:$1')));
+    for (const source of Object.values(style.sources)) source.attribution = "Mapquest";
+    return {
+        name: "Mapquest",
+        title: "Mapquest Hybrid",
+        sources: Object.fromEntries(
+            Object
+            .entries(style.sources)
+            .filter(([,s])=>s.type==="vector")
+        ),
+        sprite: [
+            {
+                id: "mapquest",
+                url: style.sprite
+            }
+        ],
+        layers: style.layers.filter(l=>l["source-layer"])
+        // TODO: attribution from https://maps.hereapi.com/v3/copyright?apikey=LQ8opWJ2kDFbknkgsPnzIIVXxvk676Qt0jahczmLGac
+    };
+}
+
 async function getOSMLayer () {
     const style = await fetch("versatilescolorfulhybrid.json").then(r => r.json());
     return {
@@ -418,7 +466,8 @@ async function getOSMLayer () {
 }
 
 async function tomtomUtils () {
-    const text = await fetch("//api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl").then(r => r.text());
+    const url = "//api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl";
+    const text = await fetch(url).then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1')));
     for (const source of Object.values(style.sources)) source.attribution = "TomTom";
     return style;
