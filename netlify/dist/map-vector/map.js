@@ -1,15 +1,17 @@
 (async function () {
     const arcgis = arcgisUtils();
     const apple = await appleUtils();
+    const bing = bingUtils();
     const google = googleUtils();
     window.imagery = {
         apple: getAppleSatelliteLayer(apple),
-        bing: getBingImageryLayer(),
+        bing: getBingImageryLayer(bing),
         esri: await getEsriImageryLayer(arcgis),
         google: getGoogleSatelliteLayer(google)
     };
     window.overlays = {
         apple: getAppleHybridLayer(apple),
+        bing: await getBingHybridLayer(bing),
         esri: await getEsriHybridLayer(arcgis),
         google: getGoogleHybridLayer(google),
         osm: await getOSMLayer()
@@ -24,7 +26,7 @@
             version: 8,
             sources: {},
             layers: [],
-            glyphs: "/mapglyphs/{fontstack}/{range}.pbf"
+            glyphs: "/mapglyphs/{fontstack}/{range}"
         }
     });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
@@ -134,8 +136,7 @@ function getAppleHybridLayer (apple) {
             {
                 id: "apple-hybrid",
                 type: "raster",
-                source: "apple-hybrid",
-                maxzoom: 21
+                source: "apple-hybrid"
             }
         ],
         onMoveEnd ({target}) {
@@ -168,8 +169,7 @@ function getAppleSatelliteLayer (apple) {
             {
                 id: "apple-satellite",
                 type: "raster",
-                source: "apple-satellite",
-                maxzoom: 22
+                source: "apple-satellite"
             }
         ],
         onMoveEnd ({target}) {
@@ -185,14 +185,58 @@ function getAppleSatelliteLayer (apple) {
     };
 }
 
-function getBingImageryLayer () {
+function bingUtils () {
+    const domains = ["", 0, 1, 2, 3, 4, 5, 6, 7].map(s => `https://t${s}.ssl.ak.tiles.virtualearth.net/`);
+    return {
+        dynamicDomains: domains.map(l => l.replace("tiles", "dynamic.tiles")),
+        domains,
+        async getAttribution (layer, map) {
+            const bounds = map.getBounds();
+            const bbox = ["West", "South", "East", "North"].map(d => bounds[`get${d}`]()).join("/");
+            const url = `//dev.virtualearth.net/REST/V1/Imagery/Copyright/auto/${layer}/${Math.round(map.getZoom())}/${bbox}?key=AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L`;
+            const resp = await fetch(url).then(r => r.json());
+            const arr = resp?.resourceSets?.flatMap(r => r?.resources)?.flatMap(r => r?.imageryProviders);
+            return [...new Set(["Microsoft", ...arr.flat()])].sort().join(", ");
+        }
+    };
+}
+
+async function getBingHybridLayer (bing) {
+    const text = await fetch("https://www.bing.com/maps/style?styleid=hybrid").then(r => r.text());
+    const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"(bkt|text|image|shield)/g, '"bing-sprite:$1')));
+    return {
+        name: "Bing Hybrid",
+        sources: {
+            "bing-mvt": {
+                type: "vector",
+                tiles: bing.dynamicDomains.map(d => `${d}comp/ch/{z}-{x}-{y}.mvt?it=G,AP,L,LA&js=1&mvt=1&features=mvt&og=0&sv=9.33`),
+                maxzoom: 21,
+                attribution: "Microsoft"
+            }
+        },
+        sprite: [
+            {
+                id: "bing-sprite",
+                url: `${location.origin}/mapassets/bing/sprite`
+            }
+        ],
+        style,
+        layers: style.layers.filter(l => l.source === "bing-mvt"),
+        async onMoveEnd ({target}) {
+            target.getSource("bing-mvt").attribution = await bing.getAttribution("Road", target);
+            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+        }
+    };
+}
+
+function getBingImageryLayer (bing) {
     return {
         name: "Bing Aerial",
         sources: {
             "bing-aerial": {
                 type: "raster",
-                tiles: [0, 1, 2, 3, 4, 5, 6, 7].map(s => `https://ecn.t${s}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=0`),
-                maxzoom: 22,
+                tiles: bing.domains.map(d => `${d}tiles/a{quadkey}.jpeg?g=0`),
+                maxzoom: 20,
                 tileSize: 256,
                 attribution: "Microsoft"
             }
@@ -201,11 +245,13 @@ function getBingImageryLayer () {
             {
                 id: "bing-aerial",
                 type: "raster",
-                source: "bing-aerial",
-                maxzoom: 22
+                source: "bing-aerial"
             }
-        ]
-        // TODO: update attribution
+        ],
+        async onMoveEnd ({target}) {
+            target.getSource("bing-aerial").attribution = await bing.getAttribution("Aerial", target);
+            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+        }
     };
 }
 
@@ -219,9 +265,7 @@ async function getEsriHybridLayer (arcgis) {
             esri: {
                 type: "vector",
                 tiles: ["https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/{z}/{y}/{x}.pbf"],
-                minzoom: 0,
                 maxzoom: 22,
-                scheme: "xyz",
                 attribution: "Esri, TomTom, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community"
             }
         },
@@ -249,7 +293,7 @@ async function getEsriImageryLayer (arcgis) {
             "esri-imagery": {
                 type: "raster",
                 tiles: ["server", "services"].map(s => `https://${s}.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false`),
-                maxzoom: 23,
+                maxzoom: 21,
                 tileSize: 256,
                 attribution: "Esri, Maxar, Earthstar Geographics, and the GIS User Community"
             }
@@ -258,9 +302,7 @@ async function getEsriImageryLayer (arcgis) {
             {
                 id: "esri-imagery",
                 type: "raster",
-                source: "esri-imagery",
-                minzoom: 0,
-                maxzoom: 23
+                source: "esri-imagery"
             }
         ],
         contributors,
@@ -309,8 +351,7 @@ function getGoogleHybridLayer (google) {
             {
                 id: "google-hybrid",
                 type: "raster",
-                source: "google-hybrid",
-                maxzoom: 22
+                source: "google-hybrid"
             }
         ],
         async onMoveEnd ({target}) {
@@ -336,8 +377,7 @@ function getGoogleSatelliteLayer (google) {
             {
                 id: "google-satellite",
                 type: "raster",
-                source: "google-satellite",
-                maxzoom: 22
+                source: "google-satellite"
             }
         ],
         async onMoveEnd ({target}) {
