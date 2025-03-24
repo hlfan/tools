@@ -10,6 +10,7 @@
         esri: await getEsriImageryLayer(arcgis),
         google: getGoogleSatelliteLayer(google),
         here: getHereSatelliteLayer(),
+        stadia: getStadiaSatelliteLayer(),
         tomtom: getTomtomSatelliteLayer(tomtom)
     };
     window.overlays = {
@@ -17,7 +18,7 @@
         bing: await getBingHybridLayer(bing),
         esri: await getEsriHybridLayer(arcgis),
         google: getGoogleHybridLayer(google),
-        mapquest: await getMapquestHybridLayer(), // here itself has no hybrid json afaict so mapquest style instead
+        mapquest: await getMapquestHybridLayer(), // Here itself has no hybrid json afaict so mapquest style instead
         osm: await getOSMLayer(),
         tomtom: getTomtomHybridLayer(tomtom)
     };
@@ -425,7 +426,7 @@ function getHereSatelliteLayer () {
     };
 }
 
-async function getMapquestHybridLayer() {
+async function getMapquestHybridLayer () {
     const text = await fetch("//styles.mapq.st/styles/satellite").then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?"[^"]+":/g, match => match.replaceAll(/"(marker|shield|parking|pom|junction|oneway)/g, '"mapquest:$1')));
     for (const source of Object.values(style.sources)) source.attribution = "Mapquest";
@@ -434,8 +435,8 @@ async function getMapquestHybridLayer() {
         title: "Mapquest Hybrid",
         sources: Object.fromEntries(
             Object
-            .entries(style.sources)
-            .filter(([,s])=>s.type==="vector")
+                .entries(style.sources)
+                .filter(([, s]) => s.type === "vector")
         ),
         sprite: [
             {
@@ -443,7 +444,7 @@ async function getMapquestHybridLayer() {
                 url: style.sprite
             }
         ],
-        layers: style.layers.filter(l=>l["source-layer"])
+        layers: style.layers.filter(l => l["source-layer"])
         // TODO: attribution from https://maps.hereapi.com/v3/copyright?apikey=LQ8opWJ2kDFbknkgsPnzIIVXxvk676Qt0jahczmLGac
     };
 }
@@ -462,6 +463,27 @@ async function getOSMLayer () {
         style,
         layers: style.layers,
         sprite: style.sprite
+    };
+}
+
+function getStadiaSatelliteLayer () {
+    return {
+        name: "Stadia",
+        title: "Stadia Maps Satellite",
+        sources: {
+            "stadia-sat": {
+                type: "raster",
+                url: "https://tiles.stadiamaps.com/data/imagery.json",
+                maxzoom: 24
+            }
+        },
+        layers: [
+            {
+                id: "stadia-sat",
+                type: "raster",
+                source: "stadia-sat"
+            }
+        ]
     };
 }
 
