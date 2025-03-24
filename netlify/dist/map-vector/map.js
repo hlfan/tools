@@ -50,6 +50,7 @@ function buildList (id, layers, type) {
             input.name = container.id;
             input.value = id;
             input.dataset.checked = false;
+            label.title = layer.title;
             label.appendChild(input);
             label.appendChild(document.createTextNode(layer.name));
             container.appendChild(label);
@@ -122,7 +123,8 @@ async function appleUtils () {
 function getAppleHybridLayer (apple) {
     const makeTiles = () => apple.getTiles("hybrid-overlay", [["{tileSizeIndex}", 1], ["{resolution}", 1], ["&lang={lang}"]]);
     return {
-        name: "Apple Hybrid",
+        name: "Apple",
+        title: "Apple Hybrid",
         sources: {
             "apple-hybrid": {
                 type: "raster",
@@ -155,7 +157,8 @@ function getAppleHybridLayer (apple) {
 function getAppleSatelliteLayer (apple) {
     const makeTiles = () => apple.getTiles("satellite", [["&size={tileSizeIndex}"], ["&scale={resolution}"]]);
     return {
-        name: "Apple Satellite",
+        name: "Apple",
+        title: "Apple Satellite",
         sources: {
             "apple-satellite": {
                 type: "raster",
@@ -205,7 +208,8 @@ async function getBingHybridLayer (bing) {
     const text = await fetch("https://www.bing.com/maps/style?styleid=hybrid").then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"(bkt|text|image|shield)/g, '"bing-sprite:$1')));
     return {
-        name: "Bing Hybrid",
+        name: "Bing",
+        title: "Bing Labels",
         sources: {
             "bing-mvt": {
                 type: "vector",
@@ -231,7 +235,8 @@ async function getBingHybridLayer (bing) {
 
 function getBingImageryLayer (bing) {
     return {
-        name: "Bing Aerial",
+        name: "Bing",
+        title: "Bing Aerial",
         sources: {
             "bing-aerial": {
                 type: "raster",
@@ -260,7 +265,8 @@ async function getEsriHybridLayer (arcgis) {
     const text = await fetch("https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/styles/root.json").then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?["}],/g, match => match.replaceAll(/"([A-Z][^"]+)"/g, '"world-basemap:$1"')));
     return {
-        name: "Esri Hybrid",
+        name: "Esri",
+        title: "Esri Hybrid Reference",
         sources: {
             esri: {
                 type: "vector",
@@ -288,7 +294,8 @@ async function getEsriHybridLayer (arcgis) {
 async function getEsriImageryLayer (arcgis) {
     const contributors = await arcgis.getContributors("World_Imagery");
     return {
-        name: "Esri World Imagery",
+        name: "Esri",
+        title: "Esri World Imagery",
         sources: {
             "esri-imagery": {
                 type: "raster",
@@ -337,7 +344,8 @@ function googleUtils () {
 
 function getGoogleHybridLayer (google) {
     return {
-        name: "Google Hybrid",
+        name: "Google",
+        title: "Google Hybrid",
         sources: {
             "google-hybrid": {
                 type: "raster",
@@ -363,7 +371,8 @@ function getGoogleHybridLayer (google) {
 
 function getGoogleSatelliteLayer (google) {
     return {
-        name: "Google Satellite",
+        name: "Google",
+        title: "Google Satellite",
         sources: {
             "google-satellite": {
                 type: "raster",
@@ -390,7 +399,8 @@ function getGoogleSatelliteLayer (google) {
 async function getOSMLayer () {
     const style = await fetch("versatilescolorfulhybrid.json").then(r => r.json());
     return {
-        name: "OpenStreetMap",
+        name: "OSM",
+        title: "OpenStreetMap",
         sources: {
             osmv: {
                 type: "vector",
