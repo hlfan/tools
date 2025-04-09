@@ -443,7 +443,7 @@ function getHereSatelliteLayer (here) {
 }
 
 async function getMapquestHybridLayer (here) {
-    const text = await fetch("//styles.mapq.st/styles/satellite").then(r => r.text());
+    const text = await fetch("https://styles.mapq.st/styles/satellite").then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?"[^"]+":/g, match => match.replaceAll(/"(marker|shield|parking|pom|junction|oneway)/g, '"mapquest:$1')));
     const hybridSources = Object.fromEntries(Object.entries(style.sources).filter(([, s]) => s.type === "vector"));
     for (const source of Object.values(hybridSources)) source.attribution = "Mapquest";
@@ -503,7 +503,7 @@ function getStadiaSatelliteLayer () {
 }
 
 async function tomtomUtils () {
-    const url = "//api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl";
+    const url = "https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl";
     const text = await fetch(url).then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1')));
     for (const source of Object.values(style.sources)) source.attribution = "TomTom";

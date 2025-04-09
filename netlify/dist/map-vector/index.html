@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Maps</title>
-		<link rel="stylesheet" href="//unpkg.com/maplibre-gl/dist/maplibre-gl.css"/>
+		<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css"/>
 		<style>
 			html,body,#map{
 				height:100%;
@@ -13,6 +13,11 @@
 				align-items:start}
 			hr{margin:.5ch}
 		</style>
+		<link rel="preload" href="versatilescolorfulhybrid.json" as="fetch" crossorigin="anonymous" />
+		<link rel="preload" href="https://styles.mapq.st/styles/satellite" as="fetch" crossorigin="anonymous" />
+		<link rel="preload" href="https://www.bing.com/maps/style?styleid=hybrid" as="fetch" crossorigin="anonymous" />
+		<link rel="preload" href="https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/styles/root.json" as="fetch" crossorigin="anonymous" />
+		<link rel="preload" href="https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl" as="fetch" crossorigin="anonymous" />
 	</head>
 	<body>
 		<form id="controls" class="maplibregl-ctrl maplibregl-ctrl-group">
@@ -21,7 +26,7 @@
 			<section id="overlays"></section>
 		</form>
 		<div id="map"></div>
-		<script src="//unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+		<script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
 		<script src="map.js"></script>
 	</body>
 </html>
