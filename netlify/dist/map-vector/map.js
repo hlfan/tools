@@ -49,6 +49,7 @@ function buildList (id, layers, type) {
     Object.entries(layers)
         .sort(([, a], [, b]) => a.name.localeCompare(b.name))
         .forEach(([id, layer]) => {
+            if (layer.update) layer.onMoveEnd = () => Object.keys(layer.sources).forEach(id => layer.update(map.getSource(id), map).then(() => map._controls.forEach(c => c._updateAttributions?.())));
             const label = document.createElement("label");
             const input = document.createElement("input");
             input.id = `${container.id}-${id}`;
@@ -62,12 +63,15 @@ function buildList (id, layers, type) {
             label.appendChild(document.createTextNode(layer.name));
             container.appendChild(label);
         });
-    container.addEventListener("change", () => {
+    container.addEventListener("change", async () => {
         const newlyChecked = container.querySelectorAll("input:checked[data-checked='false']");
         const newlyUnchecked = container.querySelectorAll("input:not(:checked)[data-checked='true']");
         for (const input of newlyChecked) {
             const layer = layers[input.value];
-            Object.entries(layer.sources).forEach(entry => map.addSource(...entry));
+            for (const [id, source] of Object.entries(layer.sources)) {
+                await layer.update?.(source, map);
+                map.addSource(id, source);
+            }
             layer.sprite?.forEach(sprite => map.addSprite(sprite.id, sprite.url));
             layer.layers.forEach(layer => map.addLayer(layer,
                 id === "imagery" ? map.getLayersOrder()[0] : undefined
@@ -78,7 +82,7 @@ function buildList (id, layers, type) {
         for (const input of newlyUnchecked) {
             const layer = layers[input.value];
             layer.layers.forEach(layer => map.removeLayer(layer.id));
-            Object.keys(layer.sources).forEach(source => map.removeSource(source));
+            for (const id of Object.keys(layer.sources)) map.removeSource(id);
             layer.sprite?.forEach(sprite => map.removeSprite(sprite.id));
             if (layer.onMoveEnd) map.off("moveend", layer.onMoveEnd);
             input.dataset.checked = false;
@@ -148,15 +152,10 @@ function getAppleHybridLayer (apple) {
                 source: "apple-hybrid"
             }
         ],
-        onMoveEnd ({target}) {
-            if (apple.hasValidBootstrap()) return;
-            apple.fetchBootstrap().then(bootstrap => {
-                apple.bootstrap = bootstrap;
-                const source = target.getSource("apple-hybrid");
-                source.tiles = makeTiles();
-                source.attribution = apple.getAttribution("hybrid-overlay");
-                target._controls.forEach(c => c._updateAttributions?.());
-            });
+        async update (source) {
+            if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
+            source.tiles = makeTiles();
+            source.attribution = apple.getAttribution("hybrid-overlay");
         }
     };
 }
@@ -182,15 +181,10 @@ function getAppleSatelliteLayer (apple) {
                 source: "apple-satellite"
             }
         ],
-        onMoveEnd ({target}) {
-            if (apple.hasValidBootstrap()) return;
-            apple.fetchBootstrap().then(bootstrap => {
-                apple.bootstrap = bootstrap;
-                const source = target.getSource("apple-satellite");
-                source.tiles = makeTiles();
-                source.attribution = apple.getAttribution("satellite");
-                target._controls.forEach(c => c._updateAttributions?.());
-            });
+        async update (source) {
+            if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
+            source.tiles = makeTiles();
+            source.attribution = apple.getAttribution("satellite");
         }
     };
 }
@@ -233,9 +227,8 @@ async function getBingHybridLayer (bing) {
         ],
         style,
         layers: style.layers.filter(l => l.source === "bing-mvt"),
-        async onMoveEnd ({target}) {
-            target.getSource("bing-mvt").attribution = await bing.getAttribution("Road", target);
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source, map) {
+            source.attribution = await bing.getAttribution("Road", map);
         }
     };
 }
@@ -260,9 +253,8 @@ function getBingImageryLayer (bing) {
                 source: "bing-aerial"
             }
         ],
-        async onMoveEnd ({target}) {
-            target.getSource("bing-aerial").attribution = await bing.getAttribution("Aerial", target);
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source, map) {
+            source.attribution = await bing.getAttribution("Aerial", map);
         }
     };
 }
@@ -292,9 +284,8 @@ async function getEsriHybridLayer (arcgis) {
         style,
         layers: style.layers,
         contributors,
-        onMoveEnd ({target}) {
-            target.getSource("esri").attribution = arcgis.getAttribution(map, contributors);
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source, map) {
+            source.attribution = arcgis.getAttribution(map, contributors);
         }
     };
 }
@@ -321,9 +312,8 @@ async function getEsriImageryLayer (arcgis) {
             }
         ],
         contributors,
-        onMoveEnd ({target}) {
-            target.getSource("esri-imagery").attribution = arcgis.getAttribution(map, contributors);
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source, map) {
+            source.attribution = arcgis.getAttribution(map, contributors);
         }
     };
 }
@@ -370,9 +360,8 @@ function getGoogleHybridLayer (google) {
                 source: "google-hybrid"
             }
         ],
-        async onMoveEnd ({target}) {
-            target.getSource("google-hybrid").attribution = await google.getAttribution(0);
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source) {
+            source.attribution = await google.getAttribution(0);
         }
     };
 }
@@ -397,9 +386,8 @@ function getGoogleSatelliteLayer (google) {
                 source: "google-satellite"
             }
         ],
-        async onMoveEnd ({target}) {
-            target.getSource("google-satellite").attribution = await google.getAttribution(1);
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source) {
+            source.attribution = await google.getAttribution(1);
         }
     };
 }
@@ -449,9 +437,8 @@ function getHereSatelliteLayer (here) {
                 source: "here-sat"
             }
         ],
-        onMoveEnd ({target}) {
-            target.getSource("here-sat").attribution = here.getAttribution(target, "Here", "sat");
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source) {
+            source.attribution = here.getAttribution(map, "Here", "sat");
         }
     };
 }
@@ -472,9 +459,8 @@ async function getMapquestHybridLayer (here) {
             }
         ],
         layers: style.layers.filter(l => l["source-layer"]),
-        onMoveEnd ({target}) {
-            for (const id of Object.keys(hybridSources)) target.getSource(id).attribution = here.getAttribution(target, "Mapquest", "Here", "in", "jp");
-            target._controls.forEach(c => c._updateAttributions?.());
+        async update (source) {
+            source.attribution = here.getAttribution(map, "Mapquest", "Here", "in", "jp");
         }
     };
 }
