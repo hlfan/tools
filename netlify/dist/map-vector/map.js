@@ -154,7 +154,7 @@ function getAppleHybridLayer (apple) {
                 const source = target.getSource("apple-hybrid");
                 source.tiles = makeTiles();
                 source.attribution = apple.getAttribution("hybrid-overlay");
-                target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+                target._controls.forEach(c => c._updateAttributions?.());
             });
         }
     };
@@ -188,7 +188,7 @@ function getAppleSatelliteLayer (apple) {
                 const source = target.getSource("apple-satellite");
                 source.tiles = makeTiles();
                 source.attribution = apple.getAttribution("satellite");
-                target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+                target._controls.forEach(c => c._updateAttributions?.());
             });
         }
     };
@@ -234,7 +234,7 @@ async function getBingHybridLayer (bing) {
         layers: style.layers.filter(l => l.source === "bing-mvt"),
         async onMoveEnd ({target}) {
             target.getSource("bing-mvt").attribution = await bing.getAttribution("Road", target);
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+            target._controls.forEach(c => c._updateAttributions?.());
         }
     };
 }
@@ -261,7 +261,7 @@ function getBingImageryLayer (bing) {
         ],
         async onMoveEnd ({target}) {
             target.getSource("bing-aerial").attribution = await bing.getAttribution("Aerial", target);
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+            target._controls.forEach(c => c._updateAttributions?.());
         }
     };
 }
@@ -293,7 +293,7 @@ async function getEsriHybridLayer (arcgis) {
         contributors,
         onMoveEnd ({target}) {
             target.getSource("esri").attribution = arcgis.getAttribution(map, contributors);
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+            target._controls.forEach(c => c._updateAttributions?.());
         }
     };
 }
@@ -322,7 +322,7 @@ async function getEsriImageryLayer (arcgis) {
         contributors,
         onMoveEnd ({target}) {
             target.getSource("esri-imagery").attribution = arcgis.getAttribution(map, contributors);
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+            target._controls.forEach(c => c._updateAttributions?.());
         }
     };
 }
@@ -371,7 +371,7 @@ function getGoogleHybridLayer (google) {
         ],
         async onMoveEnd ({target}) {
             target.getSource("google-hybrid").attribution = await google.getAttribution(0);
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+            target._controls.forEach(c => c._updateAttributions?.());
         }
     };
 }
@@ -398,7 +398,7 @@ function getGoogleSatelliteLayer (google) {
         ],
         async onMoveEnd ({target}) {
             target.getSource("google-satellite").attribution = await google.getAttribution(1);
-            target._controls.forEach(c => c._updateAttributions && c._updateAttributions());
+            target._controls.forEach(c => c._updateAttributions?.());
         }
     };
 }
