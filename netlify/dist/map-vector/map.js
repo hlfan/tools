@@ -1,14 +1,14 @@
 (async function () {
     const arcgis = arcgisUtils();
-    const apple = await appleUtils();
+    const apple = appleUtils();
     const bing = bingUtils();
     const google = googleUtils();
-    const here = await hereUtils();
+    const here = hereUtils();
     const tomtom = await tomtomUtils();
     window.imagery = {
         apple: getAppleSatelliteLayer(apple),
         bing: getBingImageryLayer(bing),
-        esri: await getEsriImageryLayer(arcgis),
+        esri: getEsriImageryLayer(arcgis),
         google: getGoogleSatelliteLayer(google),
         here: getHereSatelliteLayer(here),
         stadia: getStadiaSatelliteLayer(),
@@ -111,10 +111,10 @@ function arcgisUtils () {
     };
 }
 
-async function appleUtils () {
+function appleUtils () {
     const fetchBootstrap = () => fetch("/bootstrap").then(r => r.json());
     return {
-        bootstrap: await fetchBootstrap(),
+        bootstrap: {},
         hasValidBootstrap () {
             return this.bootstrap?.accessKey?.split("_")[0] * 1000 > Date.now();
         },
@@ -139,10 +139,10 @@ function getAppleHybridLayer (apple) {
         sources: {
             "apple-hybrid": {
                 type: "raster",
-                tiles: makeTiles(),
+                tiles: [],
                 maxzoom: 21,
                 tileSize: 256,
-                attribution: apple.getAttribution("hybrid-overlay")
+                attribution: "Apple"
             }
         },
         layers: [
@@ -168,10 +168,10 @@ function getAppleSatelliteLayer (apple) {
         sources: {
             "apple-satellite": {
                 type: "raster",
-                tiles: makeTiles(),
+                tiles: [],
                 maxzoom: 22,
                 tileSize: 256,
-                attribution: apple.getAttribution("satellite")
+                attribution: "Apple"
             }
         },
         layers: [
@@ -261,7 +261,6 @@ function getBingImageryLayer (bing) {
 
 async function getEsriHybridLayer (arcgis) {
     const basemapURL = "https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/";
-    const contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
     const text = await fetch(`${basemapURL}styles/root.json`).then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?["}],/g, match => match.replaceAll(/"([A-Z][^"]+)"/g, '"world-basemap:$1"')));
     return {
@@ -283,15 +282,14 @@ async function getEsriHybridLayer (arcgis) {
         ],
         style,
         layers: style.layers,
-        contributors,
         async update (source, map) {
-            source.attribution = arcgis.getAttribution(map, contributors);
+            if (!this.contributors) this.contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
+            source.attribution = arcgis.getAttribution(map, this.contributors);
         }
     };
 }
 
-async function getEsriImageryLayer (arcgis) {
-    const contributors = await arcgis.getContributors("World_Imagery");
+function getEsriImageryLayer (arcgis) {
     return {
         name: "Esri",
         title: "Esri World Imagery",
@@ -311,9 +309,9 @@ async function getEsriImageryLayer (arcgis) {
                 source: "esri-imagery"
             }
         ],
-        contributors,
         async update (source, map) {
-            source.attribution = arcgis.getAttribution(map, contributors);
+            if (!this.contributors) this.contributors = await arcgis.getContributors("World_Imagery");
+            source.attribution = arcgis.getAttribution(map, this.contributors);
         }
     };
 }
@@ -392,15 +390,16 @@ function getGoogleSatelliteLayer (google) {
     };
 }
 
-async function hereUtils () {
-    const auth = "apiKey=aRrXMN6rNeDunujbIgCqESvkttKlk4Pp2j5N7xTp4Ek";
-    const copyright = await fetch(`https://maps.hereapi.com/v3/copyright?${auth}`).then(r => r.json());
+function hereUtils () {
     return {
-        apiKey: auth,
-        getAttribution (map, ...copyrights) {
-            const additionalCopyrights = copyrights.filter(c => !copyright.copyrights[c]);
+        apiKey: "apiKey=aRrXMN6rNeDunujbIgCqESvkttKlk4Pp2j5N7xTp4Ek",
+        async getAttribution (map, ...copyrights) {
+            if (!this.copyrights) this.copyrights = await fetch(`https://maps.hereapi.com/v3/copyright?${this.apiKey}`)
+                .then(r => r.json())
+                .then(r => r.copyrights);
+            const additionalCopyrights = copyrights.filter(c => !this.copyrights[c]);
             const arr = copyrights
-                .flatMap(c => copyright.copyrights[c])
+                .flatMap(c => this.copyrights[c])
                 .filter(c =>
                     c &&
                     map.getZoom() >= c.minLevel &&
@@ -438,7 +437,7 @@ function getHereSatelliteLayer (here) {
             }
         ],
         async update (source) {
-            source.attribution = here.getAttribution(map, "Here", "sat");
+            source.attribution = await here.getAttribution(map, "Here", "sat");
         }
     };
 }
@@ -460,7 +459,7 @@ async function getMapquestHybridLayer (here) {
         ],
         layers: style.layers.filter(l => l["source-layer"]),
         async update (source) {
-            source.attribution = here.getAttribution(map, "Mapquest", "Here", "in", "jp");
+            source.attribution = await here.getAttribution(map, "Mapquest", "Here", "in", "jp");
         }
     };
 }
