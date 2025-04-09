@@ -522,11 +522,17 @@ async function tomtomUtils () {
     const text = await fetch(url).then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1')));
     for (const source of Object.values(style.sources)) source.attribution = "TomTom";
+    const {satellite, ...labels} = style.sources;
+    style.categorizedSources = {
+        labels,
+        satellite: {satellite}
+    };
+    style.getLayersFromSources = sources => style.layers.filter(l => Object.keys(sources).includes(l.source));
     return style;
 }
 
 function getTomtomHybridLayer (tomtom) {
-    const {satellite, ...sources} = tomtom.sources;
+    const sources = tomtom.categorizedSources.labels;
     return {
         name: "TomTom",
         title: "TomTom Hybrid",
@@ -537,16 +543,16 @@ function getTomtomHybridLayer (tomtom) {
                 url: tomtom.sprite
             }
         ],
-        layers: tomtom.layers.filter(l => l.source?.endsWith("Tiles"))
+        layers: tomtom.getLayersFromSources(sources)
     };
 }
 
 function getTomtomSatelliteLayer (tomtom) {
-    const {satellite, ...labels} = tomtom.sources;
+    const sources = tomtom.categorizedSources.satellite;
     return {
         name: "TomTom",
         title: "TomTom Satellite",
-        sources: {satellite},
-        layers: [tomtom.layers.find(l => l.source === "satellite")]
+        sources,
+        layers: tomtom.getLayersFromSources(sources)
     };
 }
