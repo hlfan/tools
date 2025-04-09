@@ -3,13 +3,14 @@
     const apple = await appleUtils();
     const bing = bingUtils();
     const google = googleUtils();
+    const here = await hereUtils();
     const tomtom = await tomtomUtils();
     window.imagery = {
         apple: getAppleSatelliteLayer(apple),
         bing: getBingImageryLayer(bing),
         esri: await getEsriImageryLayer(arcgis),
         google: getGoogleSatelliteLayer(google),
-        here: getHereSatelliteLayer(),
+        here: getHereSatelliteLayer(here),
         stadia: getStadiaSatelliteLayer(),
         tomtom: getTomtomSatelliteLayer(tomtom)
     };
@@ -18,7 +19,7 @@
         bing: await getBingHybridLayer(bing),
         esri: await getEsriHybridLayer(arcgis),
         google: getGoogleHybridLayer(google),
-        mapquest: await getMapquestHybridLayer(), // Here itself has no hybrid json afaict so mapquest style instead
+        mapquest: await getMapquestHybridLayer(here), // Here itself has no hybrid json afaict so mapquest style instead
         osm: await getOSMLayer(),
         tomtom: getTomtomHybridLayer(tomtom)
     };
@@ -403,14 +404,39 @@ function getGoogleSatelliteLayer (google) {
     };
 }
 
-function getHereSatelliteLayer () {
+async function hereUtils () {
+    const auth = "apiKey=aRrXMN6rNeDunujbIgCqESvkttKlk4Pp2j5N7xTp4Ek";
+    const copyright = await fetch(`https://maps.hereapi.com/v3/copyright?${auth}`).then(r => r.json());
+    return {
+        apiKey: auth,
+        getAttribution (map, ...copyrights) {
+            const additionalCopyrights = copyrights.filter(c => !copyright.copyrights[c]);
+            const arr = copyrights
+                .flatMap(c => copyright.copyrights[c])
+                .filter(c =>
+                    c &&
+                    map.getZoom() >= c.minLevel &&
+                    map.getZoom() <= c.maxLevel &&
+                    c.boundingBoxes.some(b =>
+                        map.getBounds().getNorth() >= b.south &&
+                        map.getBounds().getEast() >= b.west &&
+                        map.getBounds().getSouth() <= b.north &&
+                        map.getBounds().getWest() <= b.east
+                    ))
+                .map(c => c.label);
+            return [...new Set([...arr, ...additionalCopyrights])].sort().join(", ");
+        }
+    };
+}
+
+function getHereSatelliteLayer (here) {
     return {
         name: "Here",
         title: "Here Satellite",
         sources: {
             "here-sat": {
                 type: "raster",
-                tiles: ["https://maps.hereapi.com/v3/base/mc/{z}/{x}/{y}/jpeg?style=satellite.day&apiKey=aRrXMN6rNeDunujbIgCqESvkttKlk4Pp2j5N7xTp4Ek"],
+                tiles: [`https://maps.hereapi.com/v3/base/mc/{z}/{x}/{y}/jpeg?style=satellite.day&${here.apiKey}`],
                 maxzoom: 20,
                 tileSize: 256,
                 attribution: "Here, Maxar"
@@ -422,30 +448,34 @@ function getHereSatelliteLayer () {
                 type: "raster",
                 source: "here-sat"
             }
-        ]
+        ],
+        onMoveEnd ({target}) {
+            target.getSource("here-sat").attribution = here.getAttribution(target, "Here", "sat");
+            target._controls.forEach(c => c._updateAttributions?.());
+        }
     };
 }
 
-async function getMapquestHybridLayer () {
+async function getMapquestHybridLayer (here) {
     const text = await fetch("//styles.mapq.st/styles/satellite").then(r => r.text());
     const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?"[^"]+":/g, match => match.replaceAll(/"(marker|shield|parking|pom|junction|oneway)/g, '"mapquest:$1')));
-    for (const source of Object.values(style.sources)) source.attribution = "Mapquest";
+    const hybridSources = Object.fromEntries(Object.entries(style.sources).filter(([, s]) => s.type === "vector"));
+    for (const source of Object.values(hybridSources)) source.attribution = "Mapquest";
     return {
         name: "Mapquest",
         title: "Mapquest Hybrid",
-        sources: Object.fromEntries(
-            Object
-                .entries(style.sources)
-                .filter(([, s]) => s.type === "vector")
-        ),
+        sources: hybridSources,
         sprite: [
             {
                 id: "mapquest",
                 url: style.sprite
             }
         ],
-        layers: style.layers.filter(l => l["source-layer"])
-        // TODO: attribution from https://maps.hereapi.com/v3/copyright?apikey=LQ8opWJ2kDFbknkgsPnzIIVXxvk676Qt0jahczmLGac
+        layers: style.layers.filter(l => l["source-layer"]),
+        onMoveEnd ({target}) {
+            for (const id of Object.keys(hybridSources)) target.getSource(id).attribution = here.getAttribution(target, "Mapquest", "Here", "in", "jp");
+            target._controls.forEach(c => c._updateAttributions?.());
+        }
     };
 }
 
