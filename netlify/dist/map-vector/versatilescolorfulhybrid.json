@@ -163,7 +163,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -213,7 +212,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -263,7 +261,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -313,7 +310,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -827,7 +823,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -887,7 +882,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -947,7 +941,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -1007,7 +1000,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -1426,7 +1418,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -1480,7 +1471,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -1534,7 +1524,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -1588,7 +1577,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -2457,7 +2445,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -2513,7 +2500,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -2569,7 +2555,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -2625,7 +2610,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -3900,7 +3884,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -3955,7 +3938,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -4010,7 +3992,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -4065,7 +4046,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -4619,7 +4599,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -4680,7 +4659,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -4741,7 +4719,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -4802,7 +4779,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -5231,7 +5207,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -5286,7 +5261,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -5341,7 +5315,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -5396,7 +5369,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -6335,7 +6307,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -6396,7 +6367,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -6457,7 +6427,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -6518,7 +6487,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -7943,7 +7911,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -7995,7 +7962,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -8047,7 +8013,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -8099,7 +8064,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -8615,7 +8579,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -8672,7 +8635,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -8729,7 +8691,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -8786,7 +8747,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -9223,7 +9183,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -9273,7 +9232,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -9323,7 +9281,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -9373,7 +9330,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -9887,7 +9843,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -9943,7 +9898,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -9999,7 +9953,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -10055,7 +10008,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -10454,7 +10406,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -10504,7 +10455,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -10554,7 +10504,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -10604,7 +10553,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 15,
             "filter": [
                 "all",
                 [
@@ -11469,7 +11417,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -11525,7 +11472,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -11581,7 +11527,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 13,
             "filter": [
                 "all",
                 [
@@ -11637,7 +11582,6 @@
             "type": "line",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 12,
             "filter": [
                 "all",
                 [
@@ -14109,7 +14053,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 14,
             "filter": [
                 "==",
                 "kind",
@@ -14152,7 +14095,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14191,7 +14133,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14230,7 +14171,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14269,7 +14209,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14308,7 +14247,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14347,7 +14285,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14386,7 +14323,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -14425,7 +14361,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "street_labels",
-            "minzoom": 12,
             "filter": [
                 "==",
                 "kind",
@@ -15069,7 +15004,6 @@
             "type": "symbol",
             "source": "osmv",
             "source-layer": "streets",
-            "minzoom": 16,
             "filter": [
                 "all",
                 [
