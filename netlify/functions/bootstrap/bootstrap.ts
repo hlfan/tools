@@ -11,7 +11,7 @@ export default async (request: Request, context: Context) => {
             return new Response(cached, { headers: { 'Content-Type': 'application/json' } });
         }
     }
-    const tokenResponse = await fetch('https://maps.apple.com/place/mwtoken');
+    const tokenResponse = await fetch('https://maps.apple.com/imagecollection/token');
     const token = await tokenResponse.text();
     const bootstrapResponse = await fetch('https://cdn.apple-mapkit.com/ma/bootstrap', {
         headers: { authorization: `Bearer ${token}` }
