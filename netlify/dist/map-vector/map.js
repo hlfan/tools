@@ -24,7 +24,7 @@
         tomtom: getTomtomHybridLayer(tomtom)
     };
     window.map = new maplibregl.Map({
-        container: "map",
+        container: document.querySelector("main"),
         hash: true,
         maplibreLogo: false,
         maxPitch: 70,
@@ -40,7 +40,7 @@
     buildList("imagery", imagery, "radio");
     buildList("overlays", overlays, "checkbox");
     map.once("load", () =>
-        map._controlContainer.querySelector(".maplibregl-ctrl-top-left")?.appendChild(document.querySelector("#controls"))
+        map._controlContainer.querySelector(".maplibregl-ctrl-top-left")?.appendChild(document.querySelector("form"))
     );
 }());
 
@@ -48,15 +48,15 @@ function buildList (id, layers, type) {
     const container = document.getElementById(id);
     Object.entries(layers)
         .sort(([, a], [, b]) => a.name.localeCompare(b.name))
-        .forEach(([id, layer]) => {
+        .forEach(([value, layer]) => {
             if (layer.getAttribution) layer.onMoveEnd = () => Object.keys(layer.sources).forEach(id => layer.getAttribution(map.getSource(id), map).then(() => map._controls.forEach(c => c._updateAttributions?.())));
             const label = document.createElement("label");
             const input = document.createElement("input");
-            input.id = `${container.id}-${id}`;
+            input.id = `${container.id}-${value}`;
             label.htmlFor = input.id;
             input.type = type;
             input.name = container.id;
-            input.value = id;
+            input.value = value;
             input.dataset.checked = false;
             label.title = layer.title;
             label.appendChild(input);

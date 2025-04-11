@@ -4,10 +4,10 @@
 		<title>Maps</title>
 		<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css"/>
 		<style>
-			html,body,#map{
+			html,body,main{
 				height:100%;
 				margin:0}
-			#controls{padding:1ch}
+			form{padding:1ch}
 			label{
 				display:flex;
 				align-items:start}
@@ -20,12 +20,12 @@
 		<link rel="preload" href="https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl" as="fetch" crossorigin="anonymous" />
 	</head>
 	<body>
-		<form id="controls" class="maplibregl-ctrl maplibregl-ctrl-group">
+		<form class="maplibregl-ctrl maplibregl-ctrl-group">
 			<section id="imagery"></section>
 			<hr/>
 			<section id="overlays"></section>
 		</form>
-		<div id="map"></div>
+		<main></main>
 		<script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
 		<script src="map.js"></script>
 	</body>
