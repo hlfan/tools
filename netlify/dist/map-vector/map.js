@@ -49,7 +49,7 @@ function buildList (id, layers, type) {
     Object.entries(layers)
         .sort(([, a], [, b]) => a.name.localeCompare(b.name))
         .forEach(([id, layer]) => {
-            if (layer.update) layer.onMoveEnd = () => Object.keys(layer.sources).forEach(id => layer.update(map.getSource(id), map).then(() => map._controls.forEach(c => c._updateAttributions?.())));
+            if (layer.getAttribution) layer.onMoveEnd = () => Object.keys(layer.sources).forEach(id => layer.getAttribution(map.getSource(id), map).then(() => map._controls.forEach(c => c._updateAttributions?.())));
             const label = document.createElement("label");
             const input = document.createElement("input");
             input.id = `${container.id}-${id}`;
@@ -69,8 +69,9 @@ function buildList (id, layers, type) {
         for (const input of newlyChecked) {
             const layer = layers[input.value];
             for (const [id, source] of Object.entries(layer.sources)) {
-                await layer.update?.(source, map);
+                await layer.update?.(source);
                 map.addSource(id, source);
+                layer.onMoveEnd?.();
             }
             layer.sprite?.forEach(sprite => map.addSprite(sprite.id, sprite.url));
             layer.layers.forEach(layer => map.addLayer(layer,
@@ -155,6 +156,8 @@ function getAppleHybridLayer (apple) {
         async update (source) {
             if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
             source.tiles = makeTiles();
+        },
+        async getAttribution (source) {
             source.attribution = apple.getAttribution("hybrid-overlay");
         }
     };
@@ -184,6 +187,8 @@ function getAppleSatelliteLayer (apple) {
         async update (source) {
             if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
             source.tiles = makeTiles();
+        },
+        async getAttribution (source) {
             source.attribution = apple.getAttribution("satellite");
         }
     };
@@ -227,7 +232,7 @@ async function getBingHybridLayer (bing) {
         ],
         style,
         layers: style.layers.filter(l => l.source === "bing-mvt"),
-        async update (source, map) {
+        async getAttribution (source, map) {
             source.attribution = await bing.getAttribution("Road", map);
         }
     };
@@ -253,7 +258,7 @@ function getBingImageryLayer (bing) {
                 source: "bing-aerial"
             }
         ],
-        async update (source, map) {
+        async getAttribution (source, map) {
             source.attribution = await bing.getAttribution("Aerial", map);
         }
     };
@@ -282,7 +287,7 @@ async function getEsriHybridLayer (arcgis) {
         ],
         style,
         layers: style.layers,
-        async update (source, map) {
+        async getAttribution (source, map) {
             if (!this.contributors) this.contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
             source.attribution = arcgis.getAttribution(map, this.contributors);
         }
@@ -309,7 +314,7 @@ function getEsriImageryLayer (arcgis) {
                 source: "esri-imagery"
             }
         ],
-        async update (source, map) {
+        async getAttribution (source, map) {
             if (!this.contributors) this.contributors = await arcgis.getContributors("World_Imagery");
             source.attribution = arcgis.getAttribution(map, this.contributors);
         }
@@ -358,7 +363,7 @@ function getGoogleHybridLayer (google) {
                 source: "google-hybrid"
             }
         ],
-        async update (source) {
+        async getAttribution (source) {
             source.attribution = await google.getAttribution(0);
         }
     };
@@ -384,7 +389,7 @@ function getGoogleSatelliteLayer (google) {
                 source: "google-satellite"
             }
         ],
-        async update (source) {
+        async getAttribution (source) {
             source.attribution = await google.getAttribution(1);
         }
     };
@@ -436,7 +441,7 @@ function getHereSatelliteLayer (here) {
                 source: "here-sat"
             }
         ],
-        async update (source) {
+        async getAttribution (source) {
             source.attribution = await here.getAttribution(map, "Here", "sat");
         }
     };
@@ -458,7 +463,7 @@ async function getMapquestHybridLayer (here) {
             }
         ],
         layers: style.layers.filter(l => l["source-layer"]),
-        async update (source) {
+        async getAttribution (source) {
             source.attribution = await here.getAttribution(map, "Mapquest", "Here", "in", "jp");
         }
     };
