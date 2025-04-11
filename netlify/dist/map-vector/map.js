@@ -49,7 +49,7 @@ function buildList (id, layers, type) {
     Object.entries(layers)
         .sort(([, a], [, b]) => a.name.localeCompare(b.name))
         .forEach(([value, layer]) => {
-            if (layer.getAttribution) layer.onMoveEnd = () => Object.keys(layer.sources).forEach(id => layer.getAttribution(map.getSource(id), map).then(() => map._controls.forEach(c => c._updateAttributions?.())));
+            if (layer.getAttribution) layer.onMoveEnd = () => Object.keys(layer.sources).forEach(id => layer.getAttribution(map.getSource(id)).then(() => map._controls.forEach(c => c._updateAttributions?.())));
             const label = document.createElement("label");
             const input = document.createElement("input");
             input.id = `${container.id}-${value}`;
@@ -93,7 +93,7 @@ function buildList (id, layers, type) {
 
 function arcgisUtils () {
     return {
-        getAttribution (map, contributors) {
+        getAttribution (contributors) {
             return contributors
                 .filter(c => c.coverageAreas.some(a => map.getZoom() >= a.zoomMin && map.getZoom() <= a.zoomMax && (
                     map.getBounds().getNorth() >= a.bbox[0] &&
@@ -197,7 +197,7 @@ function bingUtils () {
     return {
         dynamicDomains: domains.map(l => l.replace("tiles", "dynamic.tiles")),
         domains,
-        async getAttribution (layer, map) {
+        async getAttribution (layer) {
             const bounds = map.getBounds();
             const bbox = ["West", "South", "East", "North"].map(d => bounds[`get${d}`]()).join("/");
             const url = `//dev.virtualearth.net/REST/V1/Imagery/Copyright/auto/${layer}/${Math.round(map.getZoom())}/${bbox}?key=AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L`;
@@ -230,8 +230,8 @@ async function getBingHybridLayer (bing) {
         ],
         style,
         layers: style.layers.filter(l => l.source === "bing-mvt"),
-        async getAttribution (source, map) {
-            source.attribution = await bing.getAttribution("Road", map);
+        async getAttribution (source) {
+            source.attribution = await bing.getAttribution("Road");
         }
     };
 }
@@ -256,8 +256,8 @@ function getBingImageryLayer (bing) {
                 source: "bing-aerial"
             }
         ],
-        async getAttribution (source, map) {
-            source.attribution = await bing.getAttribution("Aerial", map);
+        async getAttribution (source) {
+            source.attribution = await bing.getAttribution("Aerial");
         }
     };
 }
@@ -285,9 +285,9 @@ async function getEsriHybridLayer (arcgis) {
         ],
         style,
         layers: style.layers,
-        async getAttribution (source, map) {
+        async getAttribution (source) {
             if (!this.contributors) this.contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
-            source.attribution = arcgis.getAttribution(map, this.contributors);
+            source.attribution = arcgis.getAttribution(this.contributors);
         }
     };
 }
@@ -312,9 +312,9 @@ function getEsriImageryLayer (arcgis) {
                 source: "esri-imagery"
             }
         ],
-        async getAttribution (source, map) {
+        async getAttribution (source) {
             if (!this.contributors) this.contributors = await arcgis.getContributors("World_Imagery");
-            source.attribution = arcgis.getAttribution(map, this.contributors);
+            source.attribution = arcgis.getAttribution(this.contributors);
         }
     };
 }
@@ -396,7 +396,7 @@ function getGoogleSatelliteLayer (google) {
 function hereUtils () {
     return {
         apiKey: "apiKey=aRrXMN6rNeDunujbIgCqESvkttKlk4Pp2j5N7xTp4Ek",
-        async getAttribution (map, ...copyrights) {
+        async getAttribution (...copyrights) {
             if (!this.copyrights) this.copyrights = await fetch(`https://maps.hereapi.com/v3/copyright?${this.apiKey}`)
                 .then(r => r.json())
                 .then(r => r.copyrights);
@@ -440,7 +440,7 @@ function getHereSatelliteLayer (here) {
             }
         ],
         async getAttribution (source) {
-            source.attribution = await here.getAttribution(map, "Here", "sat");
+            source.attribution = await here.getAttribution("Here", "sat");
         }
     };
 }
@@ -462,7 +462,7 @@ async function getMapquestHybridLayer (here) {
         ],
         layers: style.layers.filter(l => l["source-layer"]),
         async getAttribution (source) {
-            source.attribution = await here.getAttribution(map, "Mapquest", "Here", "in", "jp");
+            source.attribution = await here.getAttribution("Mapquest", "Here", "in", "jp");
         }
     };
 }
