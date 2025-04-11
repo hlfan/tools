@@ -117,7 +117,7 @@ function appleUtils () {
     return {
         bootstrap: {},
         hasValidBootstrap () {
-            return this.bootstrap?.accessKey?.split("_")[0] * 1000 > Date.now();
+            return this.bootstrap?.accessKey?.split("_")[0] - 30 > Date.now() / 1000;
         },
         fetchBootstrap,
         getAttribution (source) {
@@ -133,7 +133,6 @@ function appleUtils () {
 }
 
 function getAppleHybridLayer (apple) {
-    const makeTiles = () => apple.getTiles("hybrid-overlay", [["{tileSizeIndex}", 1], ["{resolution}", 1], ["&lang={lang}"]]);
     return {
         name: "Apple",
         title: "Apple Hybrid",
@@ -155,7 +154,7 @@ function getAppleHybridLayer (apple) {
         ],
         async update (source) {
             if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
-            source.tiles = makeTiles();
+            source.tiles = apple.getTiles("hybrid-overlay", [["{tileSizeIndex}", 1], ["{resolution}", 1], ["&lang={lang}"]]);
         },
         async getAttribution (source) {
             source.attribution = apple.getAttribution("hybrid-overlay");
@@ -164,7 +163,6 @@ function getAppleHybridLayer (apple) {
 }
 
 function getAppleSatelliteLayer (apple) {
-    const makeTiles = () => apple.getTiles("satellite", [["&size={tileSizeIndex}"], ["&scale={resolution}"]]);
     return {
         name: "Apple",
         title: "Apple Satellite",
@@ -186,7 +184,7 @@ function getAppleSatelliteLayer (apple) {
         ],
         async update (source) {
             if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
-            source.tiles = makeTiles();
+            source.tiles = apple.getTiles("satellite", [["&size={tileSizeIndex}"], ["&scale={resolution}"]]);
         },
         async getAttribution (source) {
             source.attribution = apple.getAttribution("satellite");
