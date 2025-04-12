@@ -113,13 +113,12 @@ function arcgisUtils () {
 }
 
 function appleUtils () {
-    const fetchBootstrap = () => fetch("/bootstrap").then(r => r.json());
     return {
         bootstrap: {},
-        hasValidBootstrap () {
-            return this.bootstrap?.accessKey?.split("_")[0] - 30 > Date.now() / 1000;
+        async ensureBootstrap () {
+            if (this.bootstrap?.accessKey?.split("_")[0] - 30 > Date.now() / 1000) return;
+            this.bootstrap = await fetch("/bootstrap").then(r => r.json());
         },
-        fetchBootstrap,
         getAttribution (source) {
             return this.bootstrap
                 .attributions
@@ -162,10 +161,11 @@ function getAppleHybridLayer (apple) {
             }
         ],
         async update (source) {
-            if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
+            await apple.ensureBootstrap();
             source.tiles = apple.getTiles("hybrid-overlay", [["{tileSizeIndex}", 1], ["{resolution}", 1], ["&lang={lang}"]]);
         },
         async getAttribution (source) {
+            await apple.ensureBootstrap();
             source.attribution = apple.getAttribution("hybrid-overlay");
         }
     };
@@ -192,10 +192,11 @@ function getAppleSatelliteLayer (apple) {
             }
         ],
         async update (source) {
-            if (!apple.hasValidBootstrap()) apple.bootstrap = await apple.fetchBootstrap();
+            await apple.ensureBootstrap();
             source.tiles = apple.getTiles("satellite", [["&size={tileSizeIndex}"], ["&scale={resolution}"]]);
         },
         async getAttribution (source) {
+            await apple.ensureBootstrap();
             source.attribution = apple.getAttribution("satellite");
         }
     };
