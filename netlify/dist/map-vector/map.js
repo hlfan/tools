@@ -42,6 +42,11 @@
     map.once("load", () =>
         map._controlContainer.querySelector(".maplibregl-ctrl-top-left")?.appendChild(document.querySelector("form"))
     );
+    map.overlapsWithBounds = bbox =>
+        map.getBounds().getNorth() >= bbox[0] &&
+        map.getBounds().getEast() >= bbox[1] &&
+        map.getBounds().getSouth() <= bbox[2] &&
+        map.getBounds().getWest() <= bbox[3];
 }());
 
 function buildList (id, layers, type) {
@@ -95,12 +100,7 @@ function arcgisUtils () {
     return {
         getAttribution (contributors) {
             return contributors
-                .filter(c => c.coverageAreas.some(a => map.getZoom() >= a.zoomMin && map.getZoom() <= a.zoomMax && (
-                    map.getBounds().getNorth() >= a.bbox[0] &&
-                    map.getBounds().getEast() >= a.bbox[1] &&
-                    map.getBounds().getSouth() <= a.bbox[2] &&
-                    map.getBounds().getWest() <= a.bbox[3]
-                )))
+                .filter(c => c.coverageAreas.some(a => map.getZoom() >= a.zoomMin && map.getZoom() <= a.zoomMax && map.overlapsWithBounds(a.bbox)))
                 .map(c => c.attribution)
                 .join(", ");
         },
@@ -121,13 +121,22 @@ function appleUtils () {
         },
         fetchBootstrap,
         getAttribution (source) {
-            return this.bootstrap.attributions.find(a => a.attributionId === this.bootstrap.tileSources.find(s => s.tileSource === source).attributionId).global.map(a => `<a href="${a.url}">${a.name + (a.name.length < 2 ? "Apple" : "")}</a>`).join(", ");
+            return this.bootstrap
+                .attributions
+                .find(a => a.attributionId === this.bootstrap.tileSources.find(s => s.tileSource === source).attributionId)
+                .global
+                .map(a => `<a href="${a.url}">${a.name + (a.name.length < 2 ? "Apple" : "")}</a>`)
+                .join(", ");
         },
         getTiles (source, discardParams) {
             let path = this.bootstrap.tileSources.find(s => s.tileSource === source).path.replaceAll(/(\{|\})+/g, "$1");
             for (const [param, value] of discardParams) path = path.replace(param, value || "");
-            const subdomains = this.bootstrap.tileSources.find(s => s.tileSource === source).domains.flatMap(d => ["", 1, 2, 3, 4].flatMap(s => d.replace(".", `${s}.`)));
-            return subdomains.map(d => `https://${d}${path}`);
+            return this.bootstrap
+                .tileSources
+                .find(s => s.tileSource === source)
+                .domains
+                .flatMap(d => ["", 1, 2, 3, 4].flatMap(s => d.replace(".", `${s}.`)))
+                .map(d => `https://${d}${path}`);
         }
     };
 }
@@ -198,8 +207,11 @@ function bingUtils () {
         dynamicDomains: domains.map(l => l.replace("tiles", "dynamic.tiles")),
         domains,
         async getAttribution (layer) {
-            const bounds = map.getBounds();
-            const bbox = ["West", "South", "East", "North"].map(d => bounds[`get${d}`]()).join("/");
+            const bbox = map
+                .getBounds()
+                .toArray()
+                .flat()
+                .join("/");
             const url = `//dev.virtualearth.net/REST/V1/Imagery/Copyright/auto/${layer}/${Math.round(map.getZoom())}/${bbox}?key=AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L`;
             const resp = await fetch(url).then(r => r.json());
             const arr = resp?.resourceSets?.flatMap(r => r?.resources)?.flatMap(r => r?.imageryProviders);
@@ -326,10 +338,9 @@ function googleUtils () {
     return {
         makeTiles: path => domains.map(d => d + path),
         async getAttribution (layerId) {
-            const bbox = map.getBounds(),
-                encoded = [["South", "West"], ["North", "East"]]
+            const encoded = map.getBounds().toArray()
                     .map((m, i) => `!${i + 5}m2${Array.from(
-                        new Uint32Array(new Int32Array(m.map(d => bbox[`get${d}`]() * 1e7)).buffer),
+                        new Uint32Array(new Int32Array(m.map(d => d * 1e7).reverse()).buffer),
                         (l, i) => `!${i + 1}x${l}`
                     ).join("")}`)
                     .join(""),
@@ -407,12 +418,7 @@ function hereUtils () {
                     c &&
                     map.getZoom() >= c.minLevel &&
                     map.getZoom() <= c.maxLevel &&
-                    c.boundingBoxes.some(b =>
-                        map.getBounds().getNorth() >= b.south &&
-                        map.getBounds().getEast() >= b.west &&
-                        map.getBounds().getSouth() <= b.north &&
-                        map.getBounds().getWest() <= b.east
-                    ))
+                    c.boundingBoxes.some(b => map.overlapsWithBounds([b.south, b.west, b.north, b.east])))
                 .map(c => c.label);
             return [...new Set([...arr, ...additionalCopyrights])].sort().join(", ");
         }
