@@ -1,34 +1,31 @@
 const onmatch = data => postMessage({
-	type: 'match',
+	type: "match",
 	data
 });
 onmessage = ({
 	data
 }) => {
 	self.wordlist = data.wordlist;
-	self.alphabetMap = Object.fromEntries(Array.from(data.alphabet, (c, i) => [c, i]))
-		self.startTime = performance.now();
-	if (data.action != 'startSearch')
-		return;
+	self.alphabetMap = Object.fromEntries(Array.from(data.alphabet, (c, i) => [c, i]));
+	self.startTime = performance.now();
+	if (data.action !== "startSearch") return;
 	search();
 	postMessage({
-		type: 'complete',
+		type: "complete",
 		data: {
 			duration: performance.now() - startTime
 		}
 	});
 	close();
-}
+};
 
-function search() {
+function search () {
 	self.wordMap = new Map();
-	let encodedSet = new Set();
-	for (let word of wordlist) {
-		let enc = encodeWord(word);
-		if (enc == null)
-			continue;
-		if (!wordMap.has(enc))
-			wordMap.set(enc, []);
+	const encodedSet = new Set();
+	for (const word of wordlist) {
+		const enc = encodeWord(word);
+		if (enc === null) continue;
+		if (!wordMap.has(enc)) wordMap.set(enc, []);
 		wordMap.get(enc).push(word);
 		encodedSet.add(enc);
 	}
@@ -37,40 +34,36 @@ function search() {
 	findWords(0, [], false);
 }
 
-function binarySearch(arr, x) {
+function binarySearch (arr, x) {
 	let low = 0,
-	high = arr.length - 1;
+		high = arr.length - 1;
 	while (low <= high) {
-		let mid = (low + high) >> 1;
-		let midVal = arr[mid];
-		if (midVal < x)
-			low = mid + 1;
-		else if (midVal > x)
-			high = mid - 1;
-		else
-			return mid;
+		const mid = low + high >> 1;
+		const midVal = arr[mid];
+		if (midVal < x) low = mid + 1;
+		else if (midVal > x) high = mid - 1;
+		else return mid;
 	}
-	return  - (low + 1);
+	return -(low + 1);
 }
 
-function findWords(usageMask, solution, skipped) {
+function findWords (usageMask, solution, skipped) {
 	if (solution.length === 5) {
 		onmatch(solution.map(enc => wordMap.get(enc)));
 		return;
 	}
 
-	let diff = ((1 << 26) - 1) ^ usageMask;
-	let highest = highestOneBit(diff);
+	const diff = (1 << 26) - 1 ^ usageMask;
+	const highest = highestOneBit(diff);
 
-	if (!skipped)
-		selectWords(highestOneBit(highest ^ diff), highest | usageMask, usageMask, solution, true);
+	if (!skipped) selectWords(highestOneBit(highest ^ diff), highest | usageMask, usageMask, solution, true);
 	selectWords(highest, usageMask, usageMask, solution, skipped);
 }
 
-function selectWords(query, mask, usageMask, solution, skipped) {
-	let trailing = 31 - Math.clz32(query & -query);
-	let from = indexes[trailing];
-	let to = indexes[trailing + 1];
+function selectWords (query, mask, usageMask, solution, skipped) {
+	const trailing = 31 - Math.clz32(query & -query);
+	const from = indexes[trailing];
+	const to = indexes[trailing + 1];
 	for (let i = from; i < to; i++) {
 		const word = encodedWords[i];
 		if ((word & usageMask) === 0) {
@@ -81,25 +74,23 @@ function selectWords(query, mask, usageMask, solution, skipped) {
 	}
 }
 
-function encodeWord(word) {
-	if (word.length !== 5)
-		return null;
+function encodeWord (word) {
+	if (word.length !== 5) return null;
 	let enc = 0;
-	for (let char of word) {
+	for (const char of word) {
 		const bitPos = alphabetMap[char];
-		if (bitPos == undefined)
-			return null;
+		if (bitPos === undefined) return null;
 		enc |= 1 << bitPos;
 	}
 	let bitCount = 0;
 	let x = enc;
 	while (x) {
-		x &= (x - 1);
+		x &= x - 1;
 		bitCount++;
 	}
-	return (bitCount === 5) ? enc : null;
+	return bitCount === 5 ? enc : null;
 }
 
-function highestOneBit(x) {
-	return 1 << (31 - Math.clz32(x));
+function highestOneBit (x) {
+	return 1 << 31 - Math.clz32(x);
 }
