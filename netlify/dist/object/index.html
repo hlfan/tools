@@ -27,6 +27,7 @@
 				document.body.removeEventListener("click", init);
 				document.body.removeEventListener('mousemove', forwardEvent);
 				document.body.removeChild(document.body.firstElementChild);
+				[...document.body.children].map(l=>l.requestFullscreen?.() ?? l.webkitRequestFullscreen?.() ?? l.msRequestFullscreen?.())
 				ctx = new AudioContext();
 				source = ctx.createBufferSource();
 				source.buffer = await ctx.decodeAudioData(audio);
