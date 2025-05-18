@@ -475,7 +475,22 @@ async function getMapquestHybridLayer (here) {
 }
 
 async function getOSMLayer () {
-	const style = await fetch("versatilescolorfulhybrid.json").then(r => r.json());
+	const colorful = await fetch("versatilescolorful.json").then(r => r.json());
+	Reflect.deleteProperty(colorful.sources, "versatiles-shortbread");
+	colorful.sources.osmv = {
+		type: "vector",
+		url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
+	};
+	colorful.layers.filter(l => l.source === "versatiles-shortbread").forEach(l => l.source = "osmv");
+	colorful.layers = colorful.layers.filter(l => l.type !== "fill" && l.type !== "background" && l["source-layer"] !== "water_lines" && l["source-layer"] !== "dam_lines" && l["source-layer"] !== "pier_lines");
+	colorful.glyphs = colorful.glyphs.replace("/demo/shortbread/fonts", "https://tiles.versatiles.org/assets/glyphs");
+	colorful.sprite[0].url = colorful.sprite[0].url.replace("/demo/shortbread", "https://tiles.versatiles.org/assets");
+	colorful.layers.filter(l => l.type === "line").forEach(l => Reflect.deleteProperty(l, "minzoom"));
+	colorful.layers.filter(l => l.type === "line" && typeof l.paint["line-opacity"] !== "object").forEach(l => l.paint["line-opacity"] = {stops: [[15, l.paint["line-opacity"] ?? 1]]});
+	colorful.layers.filter(l => l.type === "line").map(l => l.paint["line-opacity"].stops.at(-1)[0] = Math.min(l.paint["line-opacity"].stops.at(-1)[0], 15));
+	colorful.layers.filter(l => l.type === "line").map(l => l.paint["line-opacity"].stops.push([20, 0]));
+	colorful.layers.find(l => l.id === "transport-rail-service:outline").paint["line-width"].stops.shift();
+
 	return {
 		name: "OSM",
 		title: "OpenStreetMap",
@@ -485,9 +500,8 @@ async function getOSMLayer () {
 				url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
 			}
 		},
-		style,
-		layers: style.layers,
-		sprite: style.sprite
+		layers: colorful.layers,
+		sprite: colorful.sprite
 	};
 }
 
