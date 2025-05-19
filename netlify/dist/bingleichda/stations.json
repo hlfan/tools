@@ -1,0 +1,244 @@
+{
+    "B": {
+        "U4": [
+            {
+                "station": "Braunschweiggasse",
+                "filename": "U4_Braunschweiggasse.jpg"
+            }
+        ],
+        "U6": [
+            {
+                "station": "Bahnhof Meidling",
+                "filename": "U6_Bahnhof_Meidling.jpg"
+            },
+            {
+                "station": "Burggasse-Stadthalle",
+                "filename": "U6_Burggasse-Stadthalle.jpg"
+            }
+        ]
+    },
+    "in": {
+        "U1": [
+            {
+                "station": "Donauinsel",
+                "filename": "U1_Donauinsel.jpg"
+            }
+        ],
+        "U2": [
+            {
+                "station": "Donaumarina",
+                "filename": "U2_Donaumarina.jpg"
+            },
+            {
+                "station": "Schottenring",
+                "filename": "U2_Schottenring.jpg"
+            },
+            {
+                "station": "Reinprechtsdorfer Straße",
+                "filename": "U2_Reinprechtsdorfer_Straße.jpg"
+            },
+            {
+                "station": "Matzleinsdorfer Platz",
+                "filename": "U2_Matzleinsdorfer_Platz.jpg"
+            }
+        ],
+        "U3": [
+            {
+                "station": "Ottakring",
+                "filename": "U3_Ottakring.jpg"
+            },
+            {
+                "station": "Kardinal-Nagl-Platz",
+                "filename": "U3_Kardinal-Nagl-Platz.jpg"
+            },
+            {
+                "station": "Simmering",
+                "filename": "U3_Simmering.jpg"
+            }
+        ],
+        "U4": [
+            {
+                "station": "Hietzing",
+                "filename": "U4_Hietzing.jpg"
+            },
+            {
+                "station": "Meidling Hauptstraße",
+                "filename": "U4_Meidling_Hauptstraße.jpg"
+            },
+            {
+                "station": "Schottenring",
+                "filename": "U4_Schottenring.jpg"
+            }
+        ],
+        "U5": [
+            {
+                "station": "Elterleinplatz",
+                "filename": "U5_Elterleinplatz.jpg"
+            }
+        ],
+        "U6": [
+            {
+                "station": "Bahnhof Meidling",
+                "filename": "U6_Bahnhof_Meidling.jpg"
+            },
+            {
+                "station": "Währinger Straße",
+                "filename": "U6_Währinger_Straße.jpg"
+            }
+        ]
+    },
+    "gl": {
+        "U3": [
+            {
+                "station": "Schweglerstraße",
+                "filename": "U3_Schweglerstraße.jpg"
+            },
+            {
+                "station": "Zieglergasse",
+                "filename": "U3_Zieglergasse.jpg"
+            },
+            {
+                "station": "Kardinal-Nagl-Platz",
+                "filename": "U3_Kardinal-Nagl-Platz.jpg"
+            }
+        ]
+    },
+    "ei": {
+        "U2": [
+            {
+                "station": "Reinprechtsdorfer Straße",
+                "filename": "U2_Reinprechtsdorfer_Straße.jpg"
+            },
+            {
+                "station": "Matzleinsdorfer Platz",
+                "filename": "U2_Matzleinsdorfer_Platz.jpg"
+            }
+        ],
+        "U4": [
+            {
+                "station": "Ober St. Veit",
+                "filename": "U4_Ober_St._Veit.jpg"
+            },
+            {
+                "station": "Unter St. Veit",
+                "filename": "U4_Unter_St._Veit.jpg"
+            },
+            {
+                "station": "Braunschweiggasse",
+                "filename": "U4_Braunschweiggasse.jpg"
+            },
+            {
+                "station": "Meidling Hauptstraße",
+                "filename": "U4_Meidling_Hauptstraße.jpg"
+            },
+            {
+                "station": "Heiligenstadt",
+                "filename": "U4_Heiligenstadt.jpg"
+            }
+        ],
+        "U5": [
+            {
+                "station": "Elterleinplatz",
+                "filename": "U5_Elterleinplatz.jpg"
+            }
+        ],
+        "U6": [
+            {
+                "station": "Bahnhof Meidling",
+                "filename": "U6_Bahnhof_Meidling.jpg"
+            }
+        ]
+    },
+    "ch": {
+        "U1": [
+            {
+                "station": "Schwedenplatz",
+                "filename": "U1_Schwedenplatz.jpg"
+            }
+        ],
+        "U2": [
+            {
+                "station": "Schottenring",
+                "filename": "U2_Schottenring.jpg"
+            },
+            {
+                "station": "Schottentor",
+                "filename": "U2_Schottentor.jpg"
+            },
+            {
+                "station": "Reinprechtsdorfer Straße",
+                "filename": "U2_Reinprechtsdorfer_Straße.jpg"
+            }
+        ],
+        "undefined": [
+            {
+                "station": "Lerchenfelder Straße",
+                "filename": "undefined_Lerchenfelder_Straße.jpg"
+            }
+        ],
+        "U3": [
+            {
+                "station": "Schweglerstraße",
+                "filename": "U3_Schweglerstraße.jpg"
+            },
+            {
+                "station": "Rochusgasse",
+                "filename": "U3_Rochusgasse.jpg"
+            },
+            {
+                "station": "Schlachthausgasse",
+                "filename": "U3_Schlachthausgasse.jpg"
+            }
+        ],
+        "U4": [
+            {
+                "station": "Braunschweiggasse",
+                "filename": "U4_Braunschweiggasse.jpg"
+            },
+            {
+                "station": "Schönbrunn",
+                "filename": "U4_Schönbrunn.jpg"
+            },
+            {
+                "station": "Schwedenplatz",
+                "filename": "U4_Schwedenplatz.jpg"
+            },
+            {
+                "station": "Schottenring",
+                "filename": "U4_Schottenring.jpg"
+            }
+        ],
+        "U5": [
+            {
+                "station": "Michelbeuern",
+                "filename": "U5_Michelbeuern.jpg"
+            }
+        ],
+        "U6": [
+            {
+                "station": "Am Schöpfwerk",
+                "filename": "U6_Am_Schöpfwerk.jpg"
+            },
+            {
+                "station": "Tscherttegasse",
+                "filename": "U6_Tscherttegasse.jpg"
+            },
+            {
+                "station": "Michelbeuern",
+                "filename": "U6_Michelbeuern.jpg"
+            }
+        ]
+    },
+    "da": {
+        "U1": [
+            {
+                "station": "Alaudagasse",
+                "filename": "U1_Alaudagasse.jpg"
+            },
+            {
+                "station": "Leopoldau",
+                "filename": "U1_Leopoldau.jpg"
+            }
+        ]
+    }
+}
