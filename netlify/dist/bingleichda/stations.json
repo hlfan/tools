@@ -48,6 +48,10 @@
             {
                 "station": "Bahnhof Meidling",
                 "filename": "U6_Bahnhof_Meidling.jpg"
+            },
+            {
+                "station": "Michelbeuern-Allgemeines Krankenhaus",
+                "filename": "U6_Michelbeuern.jpg"
             }
         ]
     },
@@ -69,14 +73,6 @@
     },
     "ei": {
         "U4": [
-            {
-                "station": "Ober St. Veit",
-                "filename": "U4_Ober_St._Veit.jpg"
-            },
-            {
-                "station": "Unter St. Veit",
-                "filename": "U4_Unter_St._Veit.jpg"
-            },
             {
                 "station": "Braunschweiggasse",
                 "filename": "U4_Braunschweiggasse.jpg"
@@ -100,6 +96,10 @@
             {
                 "station": "Bahnhof Meidling",
                 "filename": "U6_Bahnhof_Meidling.jpg"
+            },
+            {
+                "station": "Michelbeuern-Allgemeines Krankenhaus",
+                "filename": "U6_Michelbeuern.jpg"
             }
         ]
     },
@@ -138,7 +138,7 @@
                 "filename": "U6_Tscherttegasse.jpg"
             },
             {
-                "station": "Michelbeuern",
+                "station": "Michelbeuern-Allgemeines Krankenhaus",
                 "filename": "U6_Michelbeuern.jpg"
             }
         ]
