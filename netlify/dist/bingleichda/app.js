@@ -38,12 +38,16 @@ function renderSequence (seq) {
 	const container = document.getElementById("collage");
 	for (const station of seq) {
 		const wrapper = document.createElement("div");
-		wrapper.className = "station";
-		wrapper.style.width = `${station.width}px`;
+		wrapper.classList.add("station", `${station.line}`);
 
 		const img = document.createElement("img");
 		img.src = `img/${station.filename}`;
-		img.style.marginInlineStart = `-${station.x}px`;
+		img.alt = station.station;
+		img.onload = () => {
+			img.style.setProperty("--width", station.width);
+			img.style.setProperty("--start", `${station.start}px`);
+			img.style.setProperty("--end", `${img.naturalWidth - station.start - station.width}px`);
+		};
 		wrapper.appendChild(img);
 
 		container.appendChild(wrapper);
