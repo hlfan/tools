@@ -11,9 +11,14 @@
       font-family: Helvetica,Arial,system-ui,sans-serif;
       font-size: xx-large;
     }
-    .line {
-      background: var(--color);
+    #collage {
+      display: flex;
+      margin: auto;
+      width: fit-content;
     }
+    .line { background: var(--color); }
+    .station { overflow: hidden; }
+    img { padding-inline: 8px; }
     .U1 { --color: #e20613; }
     .U2 { --color: #a762a3; }
     .U3 { --color: #ee7d00; }
@@ -23,7 +28,7 @@
   </style>
 </head>
 <body>
-  <ol id="sequence"></ol>
+  <div id="collage"></div>
   <script src="app.js"></script>
 </body>
 </html>

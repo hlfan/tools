@@ -12,18 +12,21 @@ function getAllValidStationSequences (stations) {
 		if (!entries) return [[]];
 		const recursed = recurse(stack.slice(1));
 
-		return Object.entries(entries).flatMap(([line, stations]) =>
-			stations.flatMap(station =>
-				recursed.map(rest =>
-					[
-						{
-							...station,
-							line
-						}, ...rest
-					]
+		return Object.entries(entries)
+			.filter(([line]) => line.startsWith("U"))
+			.flatMap(([line, stations]) =>
+				stations.flatMap(station =>
+					recursed.map(rest =>
+						[
+							{
+								...station,
+								width: entries.width,
+								line
+							}, ...rest
+						]
+					)
 				)
-			)
-		);
+			);
 	}
 
 	const keys = Object.keys(stations);
@@ -32,12 +35,18 @@ function getAllValidStationSequences (stations) {
 	);
 }
 function renderSequence (seq) {
-	const ol = document.getElementById("sequence");
-	seq.forEach(({station, filename, line}) => {
-		const li = document.createElement("li");
-		li.className = `station ${line}`;
-		li.innerHTML = `<span class="line">${line}</span>: ${station} <small>(${filename})</small>`;
-		ol.appendChild(li);
-	});
+	const container = document.getElementById("collage");
+	for (const station of seq) {
+		const wrapper = document.createElement("div");
+		wrapper.className = "station";
+		wrapper.style.width = `${station.width}px`;
+
+		const img = document.createElement("img");
+		img.src = `img/${station.filename}`;
+		img.style.marginInlineStart = `-${station.x}px`;
+		wrapper.appendChild(img);
+
+		container.appendChild(wrapper);
+	}
 }
 init();

@@ -1,156 +1,191 @@
 {
     "B": {
+        "width": 65,
         "U4": [
             {
                 "station": "Braunschweiggasse",
+                "x": 346,
                 "filename": "U4_Braunschweiggasse.jpg"
             }
         ],
         "U6": [
             {
                 "station": "Bahnhof Meidling",
+                "x": 223,
                 "filename": "U6_Bahnhof_Meidling.jpg"
             }
         ]
     },
     "in": {
+        "width": 68,
         "U2": [
             {
                 "station": "Donaumarina",
+                "x": 701,
                 "filename": "U2_Donaumarina.jpg"
             },
             {
                 "station": "Schottenring",
+                "x": 764,
                 "filename": "U2_Schottenring.jpg"
             }
         ],
         "U4": [
             {
                 "station": "Hietzing",
+                "x": 584,
                 "filename": "U4_Hietzing.jpg"
             },
             {
                 "station": "Meidling Hauptstraße",
+                "x": 473,
                 "filename": "U4_Meidling_Hauptstrasse.jpg"
             },
             {
                 "station": "Schottenring",
+                "x": 699,
                 "filename": "U4_Schottenring.jpg"
             }
         ],
         "U5": [
             {
                 "station": "Elterleinplatz",
+                "x": 760,
                 "filename": "U5_Elterleinplatz.jpg"
             }
         ],
         "U6": [
             {
                 "station": "Bahnhof Meidling",
+                "x": 781,
                 "filename": "U6_Bahnhof_Meidling.jpg"
             },
             {
                 "station": "Michelbeuern-Allgemeines Krankenhaus",
+                "x": 987,
                 "filename": "U6_Michelbeuern.jpg"
             }
         ]
     },
     "gl": {
+        "width": 68,
         "U3": [
             {
                 "station": "Schweglerstraße",
+                "x": 467,
                 "filename": "U3_Schweglerstrasse.jpg"
             },
             {
                 "station": "Zieglergasse",
+                "x": 459,
                 "filename": "U3_Zieglergasse.jpg"
             },
             {
                 "station": "Kardinal-Nagl-Platz",
+                "x": 930,
                 "filename": "U3_Kardinal-Nagl-Platz.jpg"
             }
         ]
     },
     "ei": {
+        "width": 68,
         "U4": [
             {
                 "station": "Braunschweiggasse",
+                "x": 781,
                 "filename": "U4_Braunschweiggasse.jpg"
             },
             {
                 "station": "Meidling Hauptstraße",
+                "x": 335,
                 "filename": "U4_Meidling_Hauptstrasse.jpg"
             },
             {
                 "station": "Heiligenstadt",
+                "x": 508,
                 "filename": "U4_Heiligenstadt.jpg"
             }
         ],
         "U5": [
             {
                 "station": "Elterleinplatz",
+                "x": 711,
                 "filename": "U5_Elterleinplatz.jpg"
             }
         ],
         "U6": [
             {
                 "station": "Bahnhof Meidling",
+                "x": 643,
                 "filename": "U6_Bahnhof_Meidling.jpg"
             },
             {
                 "station": "Michelbeuern-Allgemeines Krankenhaus",
+                "x": 939,
                 "filename": "U6_Michelbeuern.jpg"
             }
         ]
     },
     "ch": {
+        "width": 93,
         "U2": [
             {
                 "station": "Schottenring",
+                "x": 437,
                 "filename": "U2_Schottenring.jpg"
             }
         ],
         "U4": [
             {
                 "station": "Braunschweiggasse",
+                "x": 623,
                 "filename": "U4_Braunschweiggasse.jpg"
             },
             {
                 "station": "Schönbrunn",
+                "x": 582,
                 "filename": "U4_Schoenbrunn.jpg"
             },
             {
                 "station": "Schwedenplatz",
+                "x": 474,
                 "filename": "U4_Schwedenplatz.jpg"
             },
             {
                 "station": "Schottenring",
+                "x": 375,
                 "filename": "U4_Schottenring.jpg"
             }
         ],
         "U6": [
             {
                 "station": "Am Schöpfwerk",
+                "x": 557,
                 "filename": "U6_Am_Schoepfwerk.jpg"
             },
             {
                 "station": "Tscherttegasse",
+                "x": 548,
                 "filename": "U6_Tscherttegasse.jpg"
             },
             {
                 "station": "Michelbeuern-Allgemeines Krankenhaus",
+                "x": 223,
                 "filename": "U6_Michelbeuern.jpg"
             }
         ]
     },
     "da": {
+        "width": 98,
         "U1": [
             {
                 "station": "Alaudagasse",
+                "x": 683,
                 "filename": "U1_Alaudagasse.jpg"
             },
             {
                 "station": "Leopoldau",
+                "x": 862,
                 "filename": "U1_Leopoldau.jpg"
             }
         ]
