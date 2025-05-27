@@ -12,9 +12,9 @@ export default async (request: Request, context: Context) => {
     }
     // @ts-ignore
     const cookie = Netlify.env.get("TOMTOM_SSESS"); // SSESS[\da-f]+
-    const keyResponse = await fetch("https://developer.tomtom.com/dashboard/map-maker-key", {headers: {cookie}});
-    const key = await keyResponse.text();
-    key.replaceAll(/"expiresIn":(\d+),/g,(m,n)=>`"expiresAt":${1000 * n + Date.now()},`);
+    const keyResponse = await fetch("https://developer.tomtom.com/dashboard/map-maker-key", { headers: { cookie } });
+    let key = await keyResponse.text();
+    key = key.replaceAll(/"expiresIn":(\d+),/g, (m, n) => `"expiresAt":${1000 * n + Date.now()},`);
     // @ts-ignore
     Netlify.env.set("tomtomkey", key);
     return new Response(key, {
