@@ -546,17 +546,24 @@ function getStadiaSatelliteLayer () {
 }
 
 async function tomtomUtils () {
-	const url = "https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl";
+	const keyData = await fetch("/tomtomkey").then(r => r.json());
+	const url = `https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=${keyData.key}`;
 	const text = await fetch(url).then(r => r.text());
-	const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1')));
+	const style = JSON.parse(
+		text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1'))
+			.replaceAll('"Noto', `"${keyData.key}/Noto`)
+	);
 	for (const source of Object.values(style.sources)) source.attribution = "TomTom";
 	const {satellite, ...labels} = style.sources;
-	style.categorizedSources = {
-		labels,
-		satellite: {satellite}
+	return {
+		style,
+		keyData,
+		categorizedSources: {
+			labels,
+			satellite: {satellite}
+		},
+		getLayersFromSources: sources => style.layers.filter(l => Object.keys(sources).includes(l.source))
 	};
-	style.getLayersFromSources = sources => style.layers.filter(l => Object.keys(sources).includes(l.source));
-	return style;
 }
 
 function getTomtomHybridLayer (tomtom) {
@@ -566,7 +573,7 @@ function getTomtomHybridLayer (tomtom) {
 		sprite: tomtom.then(t => [
 			{
 				id: "tomtom",
-				url: t.sprite
+				url: t.style.sprite
 			}
 		]),
 		sources: tomtom.then(t => t.categorizedSources.labels),

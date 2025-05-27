@@ -1,8 +1,8 @@
 # map glyph switcher
 /mapglyphs/Arial*       https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/resources/fonts/Arial:splat.pbf
 /mapglyphs/noto_*       https://tiles.versatiles.org/assets/glyphs/noto_:splat.pbf
-/mapglyphs/Noto-*       https://api.tomtom.com/style/1/glyph/24.4.1-1/Noto-:splat.pbf?key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl
-/mapglyphs/NotoSans-*   https://api.tomtom.com/style/1/glyph/24.4.1-1/NotoSans-:splat.pbf?key=xWH4ZowLJkTPJgfGPAyDAArSDjyROMxl
+/mapglyphs/:key/Noto-*       https://api.tomtom.com/style/1/glyph/24.4.1-1/Noto-:splat.pbf?key=:key
+/mapglyphs/:key/NotoSans-*   https://api.tomtom.com/style/1/glyph/24.4.1-1/NotoSans-:splat.pbf?key=:key
 /mapglyphs/Open*        https://static.mqcdn.com/shared/map_styles/production/fonts/Open:splat.pbf
 /mapglyphs/Roboto*      /mapassets/bing/glyphs/Roboto:splat
 
