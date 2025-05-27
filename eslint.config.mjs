@@ -231,7 +231,6 @@ export default [
 			"prefer-object-has-own": ["error"],
 			"prefer-object-spread": ["error"],
 			"prefer-promise-reject-errors": ["error"],
-			"prefer-reflect": ["error"],
 			"prefer-regex-literals": ["error"],
 			"prefer-rest-params": ["error"],
 			"prefer-spread": ["error"],

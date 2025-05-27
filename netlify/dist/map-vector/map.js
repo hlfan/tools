@@ -1,53 +1,52 @@
-(async function () {
-	const arcgis = arcgisUtils();
-	const apple = appleUtils();
-	const bing = bingUtils();
-	const google = googleUtils();
-	const here = hereUtils();
-	const tomtom = await tomtomUtils();
-	window.imagery = {
-		apple: getAppleSatelliteLayer(apple),
-		bing: getBingImageryLayer(bing),
-		esri: getEsriImageryLayer(arcgis),
-		google: getGoogleSatelliteLayer(google),
-		here: getHereSatelliteLayer(here),
-		stadia: getStadiaSatelliteLayer(),
-		tomtom: getTomtomSatelliteLayer(tomtom)
-	};
-	window.overlays = {
-		apple: getAppleHybridLayer(apple),
-		bing: await getBingHybridLayer(bing),
-		esri: await getEsriHybridLayer(arcgis),
-		google: getGoogleHybridLayer(google),
-		mapquest: await getMapquestHybridLayer(here), // Here itself has no hybrid json afaict so mapquest style instead
-		osm: await getOSMLayer(),
-		tomtom: getTomtomHybridLayer(tomtom)
-	};
-	window.map = new maplibregl.Map({
-		container: document.querySelector("main"),
-		hash: true,
-		maplibreLogo: false,
-		maxPitch: 70,
-		maxZoom: 24,
-		style: {
-			version: 8,
-			sources: {},
-			layers: [],
-			glyphs: "/mapglyphs/{fontstack}/{range}"
-		}
-	});
-	map.addControl(new maplibregl.NavigationControl(), "top-right");
-	buildList("imagery", imagery, "radio");
-	buildList("overlays", overlays, "checkbox");
-	map.once("load", () =>
-		map._controlContainer.querySelector(".maplibregl-ctrl-top-left")?.appendChild(document.querySelector("form"))
-	);
-	map.overlapsWithBounds = bbox =>
-		map.getBounds().getNorth() >= bbox[0] &&
+const ish = maybe => Promise.all([maybe]).then(a => a[0]);
+const arcgis = arcgisUtils();
+const apple = appleUtils();
+const bing = bingUtils();
+const google = googleUtils();
+const here = hereUtils();
+const tomtom = tomtomUtils();
+const imagery = {
+	apple: getAppleSatelliteLayer(apple),
+	bing: getBingImageryLayer(bing),
+	esri: getEsriImageryLayer(arcgis),
+	google: getGoogleSatelliteLayer(google),
+	here: getHereSatelliteLayer(here),
+	stadia: getStadiaSatelliteLayer(),
+	tomtom: getTomtomSatelliteLayer(tomtom)
+};
+const overlays = {
+	apple: getAppleHybridLayer(apple),
+	bing: getBingHybridLayer(bing),
+	esri: getEsriHybridLayer(arcgis),
+	google: getGoogleHybridLayer(google),
+	mapquest: getMapquestHybridLayer(here), // Here itself has no hybrid json afaict so mapquest style instead
+	osm: getOSMLayer(),
+	tomtom: getTomtomHybridLayer(tomtom)
+};
+const map = new maplibregl.Map({
+	container: document.querySelector("main"),
+	hash: true,
+	maplibreLogo: false,
+	maxPitch: 70,
+	maxZoom: 24,
+	style: {
+		version: 8,
+		sources: {},
+		layers: [],
+		glyphs: "/mapglyphs/{fontstack}/{range}"
+	}
+});
+map.addControl(new maplibregl.NavigationControl(), "top-right");
+buildList("imagery", imagery, "radio");
+buildList("overlays", overlays, "checkbox");
+map.once("load", () =>
+	map._controlContainer.querySelector(".maplibregl-ctrl-top-left")?.appendChild(document.querySelector("form"))
+);
+map.overlapsWithBounds = bbox =>
+	map.getBounds().getNorth() >= bbox[0] &&
         map.getBounds().getEast() >= bbox[1] &&
         map.getBounds().getSouth() <= bbox[2] &&
         map.getBounds().getWest() <= bbox[3];
-}());
 
 function buildList (id, layers, type) {
 	const container = document.getElementById(id);
@@ -69,27 +68,25 @@ function buildList (id, layers, type) {
 			container.appendChild(label);
 		});
 	container.addEventListener("change", async () => {
-		const newlyChecked = container.querySelectorAll("input:checked[data-checked='false']");
-		const newlyUnchecked = container.querySelectorAll("input:not(:checked)[data-checked='true']");
-		for (const input of newlyChecked) {
+		for (const input of container.querySelectorAll("input:checked[data-checked='false']")) {
 			const layer = layers[input.value];
-			for (const [id, source] of Object.entries(layer.sources)) {
+			for (const [id, source] of Object.entries(await ish(layer.sources))) {
 				await layer.update?.(source);
 				map.addSource(id, source);
 				layer.onMoveEnd?.();
 			}
-			layer.sprite?.forEach(sprite => map.addSprite(sprite.id, sprite.url));
-			layer.layers.forEach(layer => map.addLayer(layer,
+			(await ish(layer.sprite))?.forEach(sprite => map.addSprite(sprite.id, sprite.url));
+			(await ish(layer.layers)).forEach(layer => map.addLayer(layer,
 				id === "imagery" ? map.getLayersOrder()[0] : undefined
 			));
 			if (layer.onMoveEnd) map.on("moveend", layer.onMoveEnd);
 			input.dataset.checked = true;
 		}
-		for (const input of newlyUnchecked) {
+		for (const input of container.querySelectorAll("input:not(:checked)[data-checked='true']")) {
 			const layer = layers[input.value];
-			layer.layers.forEach(layer => map.removeLayer(layer.id));
-			for (const id of Object.keys(layer.sources)) map.removeSource(id);
-			layer.sprite?.forEach(sprite => map.removeSprite(sprite.id));
+			(await ish(layer.layers)).forEach(layer => map.removeLayer(layer.id));
+			for (const id of Object.keys(await ish(layer.sources))) map.removeSource(id);
+			(await ish(layer.sprite))?.forEach(sprite => map.removeSprite(sprite.id));
 			if (layer.onMoveEnd) map.off("moveend", layer.onMoveEnd);
 			input.dataset.checked = false;
 		}
@@ -221,9 +218,7 @@ function bingUtils () {
 	};
 }
 
-async function getBingHybridLayer (bing) {
-	const text = await fetch("https://www.bing.com/maps/style?styleid=hybrid").then(r => r.text());
-	const style = JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"(bkt|text|image|shield)/g, '"bing-sprite:$1')));
+function getBingHybridLayer (bing) {
 	return {
 		name: "Bing",
 		title: "Bing Labels",
@@ -241,8 +236,10 @@ async function getBingHybridLayer (bing) {
 				url: `${location.origin}/mapassets/bing/sprite`
 			}
 		],
-		style,
-		layers: style.layers.filter(l => l.source === "bing-mvt"),
+		layers: fetch("https://www.bing.com/maps/style?styleid=hybrid")
+			.then(r => r.text())
+			.then(text => JSON.parse(text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"(bkt|text|image|shield)/g, '"bing-sprite:$1'))))
+			.then(b => b.layers.filter(l => l.source === "bing-mvt")),
 		async getAttribution (source) {
 			source.attribution = await bing.getAttribution("Road");
 		}
@@ -275,10 +272,14 @@ function getBingImageryLayer (bing) {
 	};
 }
 
-async function getEsriHybridLayer (arcgis) {
+function getEsriHybridLayer (arcgis) {
+	function prepare (text) {
+		return JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?["}],/g, match => match.replaceAll(/"([A-Z][^"]+)"/g, '"world-basemap:$1"')));
+	}
 	const basemapURL = "https://cdn.arcgis.com/sharing/rest/content/items/da44d3524641418b936b74b48f0e3060/resources/";
-	const text = await fetch(`${basemapURL}styles/root.json`).then(r => r.text());
-	const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?["}],/g, match => match.replaceAll(/"([A-Z][^"]+)"/g, '"world-basemap:$1"')));
+	const style = fetch(`${basemapURL}styles/root.json`)
+		.then(r => r.text())
+		.then(prepare);
 	return {
 		name: "Esri",
 		title: "Esri Hybrid Reference",
@@ -296,8 +297,7 @@ async function getEsriHybridLayer (arcgis) {
 				url: `${basemapURL}sprites/sprite`
 			}
 		],
-		style,
-		layers: style.layers,
+		layers: style.then(h => h.layers),
 		async getAttribution (source) {
 			if (!this.contributors) this.contributors = await arcgis.getContributors("Vector/World_Basemap_v2");
 			source.attribution = arcgis.getAttribution(this.contributors);
@@ -452,44 +452,63 @@ function getHereSatelliteLayer (here) {
 	};
 }
 
-async function getMapquestHybridLayer (here) {
-	const text = await fetch("https://styles.mapq.st/styles/satellite").then(r => r.text());
-	const style = JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?"[^"]+":/g, match => match.replaceAll(/"(marker|shield|parking|pom|junction|oneway)/g, '"mapquest:$1')));
-	const hybridSources = Object.fromEntries(Object.entries(style.sources).filter(([, s]) => s.type === "vector"));
-	for (const source of Object.values(hybridSources)) source.attribution = "Mapquest";
+function getMapquestHybridLayer (here) {
+	function prepare (text) {
+		return JSON.parse(text.replaceAll(/"icon-image":[\w\W]+?"[^"]+":/g, match => match.replaceAll(/"(marker|shield|parking|pom|junction|oneway)/g, '"mapquest:$1')));
+	}
+	const style = fetch("https://styles.mapq.st/styles/satellite")
+		.then(r => r.text())
+		.then(prepare);
 	return {
 		name: "Mapquest",
 		title: "Mapquest Hybrid",
-		sources: hybridSources,
-		sprite: [
+		sources: style.then(m =>
+			Object.fromEntries(
+				Object.entries(m.sources)
+					.filter(([, s]) => s.type === "vector")
+					.map(([k, v]) => [
+						k,
+						{
+							...v,
+							attribution: "Mapquest"
+						}
+					])
+			)
+		),
+		sprite: style.then(m => [
 			{
 				id: "mapquest",
-				url: style.sprite
+				url: m.sprite
 			}
-		],
-		layers: style.layers.filter(l => l["source-layer"]),
+		]),
+		layers: style.then(m => m.layers.filter(l => l["source-layer"])),
 		async getAttribution (source) {
 			source.attribution = await here.getAttribution("Mapquest", "Here", "in", "jp");
 		}
 	};
 }
 
-async function getOSMLayer () {
-	const colorful = await fetch("versatilescolorful.json").then(r => r.json());
-	Reflect.deleteProperty(colorful.sources, "versatiles-shortbread");
-	colorful.sources.osmv = {
-		type: "vector",
-		url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
-	};
-	colorful.layers.filter(l => l.source === "versatiles-shortbread").forEach(l => l.source = "osmv");
-	colorful.layers = colorful.layers.filter(l => l.type !== "fill" && l.type !== "background" && l["source-layer"] !== "water_lines" && l["source-layer"] !== "dam_lines" && l["source-layer"] !== "pier_lines");
-	colorful.glyphs = colorful.glyphs.replace("/demo/shortbread/fonts", "https://tiles.versatiles.org/assets/glyphs");
-	colorful.sprite[0].url = colorful.sprite[0].url.replace("/demo/shortbread", "https://tiles.versatiles.org/assets");
-	colorful.layers.filter(l => l.type === "line").forEach(l => Reflect.deleteProperty(l, "minzoom"));
-	colorful.layers.filter(l => l.type === "line" && typeof l.paint["line-opacity"] !== "object").forEach(l => l.paint["line-opacity"] = {stops: [[15, l.paint["line-opacity"] ?? 1]]});
-	colorful.layers.filter(l => l.type === "line").map(l => l.paint["line-opacity"].stops.at(-1)[0] = Math.min(l.paint["line-opacity"].stops.at(-1)[0], 15));
-	colorful.layers.filter(l => l.type === "line").map(l => l.paint["line-opacity"].stops.push([20, 0]));
-	colorful.layers.find(l => l.id === "transport-rail-service:outline").paint["line-width"].stops.shift();
+function getOSMLayer () {
+	function makeHybrid (colorful) {
+		delete colorful.sources["versatiles-shortbread"];
+		colorful.sources.osmv = {
+			type: "vector",
+			url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
+		};
+		colorful.layers.filter(l => l.source === "versatiles-shortbread").forEach(l => l.source = "osmv");
+		colorful.layers = colorful.layers.filter(l => l.type !== "fill" && l.type !== "background" && l["source-layer"] !== "water_lines" && l["source-layer"] !== "dam_lines" && l["source-layer"] !== "pier_lines");
+		colorful.glyphs = colorful.glyphs.replace("/demo/shortbread/fonts", "https://tiles.versatiles.org/assets/glyphs");
+		colorful.sprite[0].url = colorful.sprite[0].url.replace("/demo/shortbread", "https://tiles.versatiles.org/assets");
+		colorful.layers.filter(l => l.type === "line").forEach(l => delete l.minzoom);
+		colorful.layers.filter(l => l.type === "line" && typeof l.paint["line-opacity"] !== "object").forEach(l => l.paint["line-opacity"] = {stops: [[15, l.paint["line-opacity"] ?? 1]]});
+		colorful.layers.filter(l => l.type === "line").map(l => l.paint["line-opacity"].stops.at(-1)[0] = Math.min(l.paint["line-opacity"].stops.at(-1)[0], 15));
+		colorful.layers.filter(l => l.type === "line").map(l => l.paint["line-opacity"].stops.push([20, 0]));
+		colorful.layers.find(l => l.id === "transport-rail-service:outline").paint["line-width"].stops.shift();
+		return colorful;
+	}
+	const style = fetch("versatilescolorful.json")
+		.then(r => r.json())
+		.then(makeHybrid);
 
 	return {
 		name: "OSM",
@@ -500,8 +519,8 @@ async function getOSMLayer () {
 				url: "https://vector.openstreetmap.org/shortbread_v1/tilejson.json"
 			}
 		},
-		layers: colorful.layers,
-		sprite: colorful.sprite
+		layers: style.then(h => h.layers),
+		sprite: style.then(h => h.sprite)
 	};
 }
 
@@ -541,27 +560,25 @@ async function tomtomUtils () {
 }
 
 function getTomtomHybridLayer (tomtom) {
-	const sources = tomtom.categorizedSources.labels;
 	return {
 		name: "TomTom",
 		title: "TomTom Hybrid",
-		sources,
-		sprite: [
+		sprite: tomtom.then(t => [
 			{
 				id: "tomtom",
-				url: tomtom.sprite
+				url: t.sprite
 			}
-		],
-		layers: tomtom.getLayersFromSources(sources)
+		]),
+		sources: tomtom.then(t => t.categorizedSources.labels),
+		layers: tomtom.then(t => t.getLayersFromSources(t.categorizedSources.labels))
 	};
 }
 
 function getTomtomSatelliteLayer (tomtom) {
-	const sources = tomtom.categorizedSources.satellite;
 	return {
 		name: "TomTom",
 		title: "TomTom Satellite",
-		sources,
-		layers: tomtom.getLayersFromSources(sources)
+		sources: tomtom.then(t => t.categorizedSources.satellite),
+		layers: tomtom.then(t => t.getLayersFromSources(t.categorizedSources.satellite))
 	};
 }
