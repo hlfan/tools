@@ -1,28 +1,33 @@
+function getLayers () {
+	const arcgis = arcgisUtils();
+	const apple = appleUtils();
+	const bing = bingUtils();
+	const google = googleUtils();
+	const here = hereUtils();
+	const tomtom = tomtomUtils();
+	return {
+		imagery: {
+			apple: getAppleSatelliteLayer(apple),
+			bing: getBingImageryLayer(bing),
+			esri: getEsriImageryLayer(arcgis),
+			google: getGoogleSatelliteLayer(google),
+			here: getHereSatelliteLayer(here),
+			stadia: getStadiaSatelliteLayer(),
+			tomtom: getTomtomSatelliteLayer(tomtom)
+		},
+		overlays: {
+			apple: getAppleHybridLayer(apple),
+			bing: getBingHybridLayer(bing),
+			esri: getEsriHybridLayer(arcgis),
+			google: getGoogleHybridLayer(google),
+			mapquest: getMapquestHybridLayer(here), // Here itself has no hybrid json afaict so mapquest style instead
+			osm: getOSMLayer(),
+			tomtom: getTomtomHybridLayer(tomtom)
+		}
+	};
+}
 const ish = maybe => Promise.all([maybe]).then(a => a[0]);
-const arcgis = arcgisUtils();
-const apple = appleUtils();
-const bing = bingUtils();
-const google = googleUtils();
-const here = hereUtils();
-const tomtom = tomtomUtils();
-const imagery = {
-	apple: getAppleSatelliteLayer(apple),
-	bing: getBingImageryLayer(bing),
-	esri: getEsriImageryLayer(arcgis),
-	google: getGoogleSatelliteLayer(google),
-	here: getHereSatelliteLayer(here),
-	stadia: getStadiaSatelliteLayer(),
-	tomtom: getTomtomSatelliteLayer(tomtom)
-};
-const overlays = {
-	apple: getAppleHybridLayer(apple),
-	bing: getBingHybridLayer(bing),
-	esri: getEsriHybridLayer(arcgis),
-	google: getGoogleHybridLayer(google),
-	mapquest: getMapquestHybridLayer(here), // Here itself has no hybrid json afaict so mapquest style instead
-	osm: getOSMLayer(),
-	tomtom: getTomtomHybridLayer(tomtom)
-};
+const {imagery, overlays} = getLayers();
 const map = new maplibregl.Map({
 	container: document.querySelector("main"),
 	hash: true,
