@@ -551,18 +551,18 @@ function getStadiaSatelliteLayer () {
 }
 
 async function tomtomUtils () {
-	const keyData = await fetch("/tomtomkey").then(r => r.json());
-	const url = `https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=${keyData.key}`;
+	const key = "Pe3XgaHEl834YExaEiPG2Hc0SpozbwNf";
+	const url = `https://api.tomtom.com/style/1/style/24.4.*?map=2/basic_street-satellite&poi=2/poi_dynamic-satellite&key=${key}`;
 	const text = await fetch(url).then(r => r.text());
 	const style = JSON.parse(
 		text.replaceAll(/"icon-image":[^:]+,/g, match => match.replaceAll(/"({|traffic_)/g, '"tomtom:$1'))
-			.replaceAll('"Noto', `"${keyData.key}/Noto`)
+			.replaceAll('"Noto', `"${key}/Noto`)
 	);
 	for (const source of Object.values(style.sources)) source.attribution = "TomTom";
 	const {satellite, ...labels} = style.sources;
 	return {
 		style,
-		keyData,
+		key,
 		categorizedSources: {
 			labels,
 			satellite: {satellite}
