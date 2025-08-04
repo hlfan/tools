@@ -3,7 +3,11 @@ import parse from "https://cdn.jsdelivr.net/npm/parse-svg-path/+esm";
 
 const R = 6378137;
 export function normalizePathData (d) {
-	const segments = abs(parse(d));
+	const segments = [];
+	for (const [code, ...vals] of abs(parse(d))) {
+		segments.push(code);
+		while (vals.length) segments.push(vals.splice(0, 2));
+	}
 	return segments;
 }
 function wgs84ToMercator ([lng, lat]) {
@@ -12,11 +16,9 @@ function wgs84ToMercator ([lng, lat]) {
 	return [x, y];
 }
 export function segmentsToMercatorPath (segments) {
-	return segments.map(seg => {
-		const [code, ...vals] = seg;
-		const mVals = [];
-		for (let i = 0; i < vals.length; i += 2) mVals.push(...wgs84ToMercator([vals[i], vals[i + 1]]));
-		return [code, ...mVals];
+	return segments.map(coords => {
+		if (typeof coords === "string") return coords;
+		return wgs84ToMercator(coords);
 	});
 }
 
@@ -26,8 +28,8 @@ export function renderPathTiles ({pathEl, bandWidth, zoom, tileUrl, canvas, land
 	const tileSize = 256;
 	const metersPerPixel = 2 * Math.PI * R / (tileSize * 2 ** zoom);
 	const tangentPx = Math.ceil(bandLength / metersPerPixel);
-	const normalPx = Math.ceil(bandWidth / metersPerPixel);
-	const deltaTangentPx = bandWidth * normalSmoothness;
+	const normalPx = Math.ceil(bandWidth);
+	const deltaTangentPx = bandWidth * metersPerPixel * normalSmoothness;
 	if (landscape) {
 		canvas.width = tangentPx;
 		canvas.height = normalPx;
